@@ -1,0 +1,173 @@
+{
+  "name": "Nachfassen-Erinnerung (Telegram) v1.1",
+  "nodes": [
+    {
+      "id": "nf-note",
+      "name": "Anleitung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -260
+      ],
+      "parameters": {
+        "width": 900,
+        "height": 300,
+        "content": "## Nachfassen-Erinnerung (Telegram) v1.1 (Telegram HTML-Modus, Sonderzeichen escaped)\n**Einrichten:**\n1. Im Knoten *Offene Nachfass-Termine lesen* Credential **Airtable Jobsuche** wählen.\n2. Im Knoten *Telegram senden* Credential **Telegram Jobsuche** wählen (derselbe Bot wie bei der Fehlerbenachrichtigung, Chat ID eingetragen).\n3. Speichern und **Active** einschalten. Manuell testen: Knoten *Start*.\n\n**Ablauf:** Täglich um 8:17 (Europe/Berlin) liest der Workflow die Tabelle *Stellen und Bewerbungen*. Für jede Stelle mit *Nachfassen am* <= heute und Status Beworben, Interview oder Antwort erhalten kommt EINE Telegram-Nachricht (alle fälligen Stellen in einer Nachricht). Es wird nichts an Arbeitgeber gesendet und nichts in Airtable geändert.\nNach dem Nachfassen in Airtable *Nachfassen am* leeren oder ein neues Datum setzen, sonst kommt die Erinnerung am nächsten Tag wieder.\n**Kein Gemini-Aufruf** (0 Tokens)."
+      }
+    },
+    {
+      "id": "nf-start",
+      "name": "Start",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "nf-zeitplan",
+      "name": "Zeitplan (täglich 8:17)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        300
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "days",
+              "daysInterval": 1,
+              "triggerAtHour": 8,
+              "triggerAtMinute": 17
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "nf-airtable",
+      "name": "Offene Nachfass-Termine lesen",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        260,
+        200
+      ],
+      "alwaysOutputData": true,
+      "parameters": {
+        "operation": "search",
+        "base": {
+          "__rl": true,
+          "value": "YOUR_AIRTABLE_BASE_ID",
+          "mode": "id"
+        },
+        "table": {
+          "__rl": true,
+          "value": "YOUR_JOBS_TABLE_ID",
+          "mode": "id"
+        },
+        "filterByFormula": "AND({Nachfassen am}, IS_BEFORE({Nachfassen am}, DATEADD(TODAY(), 1, 'days')), OR({Status}='Beworben', {Status}='Interview', {Status}='Antwort erhalten'))",
+        "returnAll": true,
+        "options": {}
+      },
+      "credentials": {
+        "airtableTokenApi": {
+          "name": "Airtable Jobsuche"
+        }
+      }
+    },
+    {
+      "id": "nf-code",
+      "name": "Nachricht bauen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        520,
+        200
+      ],
+      "parameters": {
+        "jsCode": "// Telegram-Nachricht aus den fälligen Stellen bauen (Klartext, ohne Markdown).\nconst items = $input.all().filter(it => it.json && (it.json.fields || it.json.id));\nconst today = $now.toFormat('dd.MM.yyyy');\nconst rows = [];\nfor (const it of items) {\n  const f = it.json.fields || it.json;\n  const title = f['Stellentitel'] || '(ohne Titel)';\n  const status = f['Status'] || '?';\n  const due = f['Nachfassen am'] ? $now.constructor.fromISO(f['Nachfassen am']).toFormat('dd.MM.yyyy') : '?';\n  const applied = f['Beworben am'] ? ', beworben am ' + $now.constructor.fromISO(f['Beworben am']).toFormat('dd.MM.yyyy') : '';\n  const link = f['Link zur Stelle'] ? '\\n   ' + f['Link zur Stelle'] : '';\n  rows.push(`• ${title}\\n   Status: ${status}${applied}, nachfassen seit: ${due}${link}`);\n}\nif (!rows.length) return [];   // nichts fällig: keine Nachricht\nconst text = [`📌 Nachfassen heute (${today}): ${rows.length} Stelle(n)`, '', ...rows, '', 'Nach dem Nachfassen in Airtable das Datum leeren oder neu setzen.'].join('\\n');\nreturn [{ json: { text, count: rows.length } }];\n"
+      }
+    },
+    {
+      "id": "nf-telegram",
+      "name": "Telegram senden",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        780,
+        200
+      ],
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ String($json.text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "name": "Telegram Jobsuche"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "Offene Nachfass-Termine lesen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zeitplan (täglich 8:17)": {
+      "main": [
+        [
+          {
+            "node": "Offene Nachfass-Termine lesen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Offene Nachfass-Termine lesen": {
+      "main": [
+        [
+          {
+            "node": "Nachricht bauen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nachricht bauen": {
+      "main": [
+        [
+          {
+            "node": "Telegram senden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin",
+    "saveDataErrorExecution": "all"
+  },
+  "pinData": {}
+}

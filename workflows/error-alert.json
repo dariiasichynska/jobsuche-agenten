@@ -1,0 +1,95 @@
+{
+  "name": "Fehlerbenachrichtigung (Telegram)",
+  "nodes": [
+    {
+      "id": "fb-note",
+      "name": "Anleitung",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -40,
+        -240
+      ],
+      "parameters": {
+        "width": 760,
+        "height": 260,
+        "content": "## Fehlerbenachrichtigung (Telegram)\n**Einrichten:**\n1. Im Knoten *Telegram senden* Credential **Telegram Jobsuche** anlegen (Token: @BotFather > /mybots > API Token) und auswählen.\n2. Chat ID ist eingetragen (privater Chat mit dem Bot). Vorher im Chat mit dem Bot einmal *Start* gedrückt haben.\n3. Speichern und veröffentlichen (Publish).\n4. Im Workflow *Employer-Scout v1.3.4*: Settings > **Error workflow** > diesen Workflow wählen.\n\nDer Error Trigger löst nur bei Läufen aus, die ein anderer Workflow ausgelöst hat (z. B. per Zeitplan), nicht bei manuellen Tests."
+      }
+    },
+    {
+      "id": "fb-trigger",
+      "name": "Fehler-Auslöser",
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "fb-code",
+      "name": "Nachricht bauen",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        100
+      ],
+      "parameters": {
+        "jsCode": "// Fehlermeldung für Telegram bauen (Klartext, ohne Markdown).\nconst j = $input.first().json;\nconst ex = j.execution || {};\nconst wf = j.workflow || {};\nconst err = ex.error || {};\nconst msg = String(err.message || 'unbekannter Fehler').slice(0, 600);\nconst text = [\n  '⚠️ n8n: Workflow fehlgeschlagen',\n  'Workflow: ' + (wf.name || '?'),\n  'Knoten: ' + (ex.lastNodeExecuted || '?'),\n  'Fehler: ' + msg,\n  'Lauf-ID: ' + (ex.id || '?') + (ex.mode ? ' (' + ex.mode + ')' : ''),\n  ex.url ? 'Öffnen: ' + ex.url : null,\n].filter(Boolean).join('\\n');\nreturn [{ json: { text } }];\n"
+      }
+    },
+    {
+      "id": "fb-telegram",
+      "name": "Telegram senden",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        480,
+        100
+      ],
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ $json.text }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "credentials": {
+        "telegramApi": {
+          "name": "Telegram Jobsuche"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Fehler-Auslöser": {
+      "main": [
+        [
+          {
+            "node": "Nachricht bauen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nachricht bauen": {
+      "main": [
+        [
+          {
+            "node": "Telegram senden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Europe/Berlin"
+  },
+  "pinData": {}
+}
