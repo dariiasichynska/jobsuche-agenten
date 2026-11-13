@@ -42,3 +42,15 @@ Real problems from building and running the workflows, in the order they appeare
 - A cover letter copied from a PDF keeps every layout line break. Most applications go by e-mail, so the main output is now e-mail text: one paragraph per line.
 - File names must not contain the employer's name.
 - Approved wording is never changed without asking, and nothing is added that I did not decide (for example attachments).
+
+## When the server fails at night
+
+- **The error workflow has blind spots.** It fires only for runs that end with status *Error* and were started by a schedule or another workflow. A run cancelled by a too-short timeout, a crashed run and every manual test stay silent. External watchdogs (Healthchecks.io) close that gap.
+- **The alarm must not depend on what fails.** On 12 Nov the server's task runner was down. The error workflow started with a Code node, so it failed in the same way as the workflow it was meant to report. Version 1.1 builds the message in the Telegram node itself.
+- **"Up" is not "working".** The readiness endpoint answered "up" while Code nodes could not run. Retries on Code nodes and a success ping at the end of each run are what actually prove a run worked.
+- **A timeout is not a fix.** A forced limit hides the cause of a long run. The first nightly run was cancelled by a timeout set to 2 minutes by mistake; the real causes were on the server (database in recovery mode, task runner not available).
+- **Check the free plan before relying on an alert channel.** UptimeRobot's free plan has no Telegram alerts, so it reports by e-mail; Telegram alerts come from Healthchecks.io and the error workflow.
+
+## AI estimates distances badly
+
+- A job about 3 km from my reference point was excluded as "more than 7 km away", because the model judged the distance from the district name. Planned fix (v1.7): no distance exclusion from the model; Berlin ads without an exact address get a "check address" flag instead.

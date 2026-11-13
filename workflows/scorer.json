@@ -1,30 +1,22 @@
 {
-  "name": "Scorer v1.2",
+  "name": "Scorer v1.5",
   "nodes": [
     {
-      "id": "sc-note",
+      "parameters": {
+        "content": "## Scorer v1.5\n**Ort (2026-11-08):** Berlin oder 100 % remote deutschlandweit = normal bewertet; anderer Ort mit Präsenz/Hybrid = Ausschluss.\n**Zwei Eingänge:** *Formular* (manuell) und *Vom Job-Scout* (automatisch, gleiche Feldnamen). Beide laufen durch dieselbe Bewertung.\n**Vor dem ersten Lauf:**\n1. Im Knoten *In Airtable speichern* Credential **Airtable Jobsuche** wählen.\n2. In den Knoten *Gemini* und *Gemini Ersatz* Credential **Gemini – Jobsuche** wählen.\n3. Speichern, **Publish**, dann die Formular-URL aus dem Knoten *Formular* öffnen (Production URL).\n\n**Ablauf:** Stellenanzeige in das Formular einfügen → 1 Gemini-Aufruf (2 bei Ausfall des Hauptmodells) → Score wird im Code deterministisch aus den Teilwerten berechnet (Scope 50 / Skills 20 / Sprache 10 / Ort 10 / Bedingungen 10, Strafpunkte, Bonus) → Datensatz in *Stellen und Bewerbungen* mit Status **Bewertet** (bei hartem Ausschluss **Nicht beworben**).\nEs geht nur der Anzeigentext und ein Kurzprofil ohne Kontaktdaten an Gemini. Nichts wird an Arbeitgeber gesendet.\nRegeln und Zahlen: claude/scorer-criteria.md (bestätigt 07.11.2026). Ändern nur im Knoten *Parameter*.\n**Writer-Schwelle:** Score >= 75 und kein Ausschluss. Der Writer läuft getrennt (Claude), dieser Workflow setzt nur die Daten.\n**v1.4 (10.11.2026):** Kunden-/Telefonarbeit = harter Ausschluss; fehlende Muss-Anforderung deckelt den Score auf 70, aber nur wenn die ganze Werkzeug-Klasse fehlt (SAP, Programmierung, HGB ...); Abschlüsse, Jahre Erfahrung, Führerschein, Sprachen, Zertifikate, Bürosoftware und Tools aus bekannten Klassen (anderes CRM, Asana/Jira, Power Automate) werden im Code aus den Muss-Lücken herausgenommen; Gehalt in der Anzeige unter dem Mindestgehalt = harter Ausschluss (kein Gehalt = nur offene Frage); *ab sofort* ist kein Abzug; Lücken nur, wenn die Anzeige sie nennt.\n**v1.5 (12.11.2026):** Nur Absicherung, Bewertung unverändert: alle Code-Knoten wiederholen bis zu 5× (5 s Pause), falls der Task-Runner auf dem Server kurz nicht bereit ist.",
+        "height": 430,
+        "width": 980
+      },
+      "id": "11f2bece-db82-47b7-8fa2-ba577a6cddaa",
       "name": "Anleitung",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        -60
-      ],
-      "parameters": {
-        "width": 980,
-        "height": 360,
-        "content": "## Scorer v1.2\n**v1.2 (08.11.2026):** Arbeitsweg ab REFERENCE_POINT (max. ~7 km / 30 Min.), \"sehr gute Deutschkenntnisse\" ohne Abzug, Vertriebsrollen Scope max. 15, Gehalt unter Minimum -> Bedingungen max. 3. Nur der Knoten *Parameter* hat sich geändert.\n**Ort (2026-11-08):** Berlin oder 100 % remote deutschlandweit = normal bewertet; anderer Ort mit Präsenz/Hybrid = Ausschluss.\n**Zwei Eingänge:** *Formular* (manuell) und *Vom Job-Scout* (automatisch, gleiche Feldnamen). Beide laufen durch dieselbe Bewertung.\n**Vor dem ersten Lauf:**\n1. Im Knoten *In Airtable speichern* Credential **Airtable Jobsuche** wählen.\n2. In den Knoten *Gemini* und *Gemini Ersatz* Credential **Gemini – Jobsuche** wählen.\n3. Speichern, **Active** einschalten, dann die Formular-URL aus dem Knoten *Formular* öffnen (Production URL).\n\n**Ablauf:** Stellenanzeige in das Formular einfügen → 1 Gemini-Aufruf (2 bei Ausfall des Hauptmodells) → Score wird im Code deterministisch aus den Teilwerten berechnet (Scope 50 / Skills 20 / Sprache 10 / Ort 10 / Bedingungen 10, Strafpunkte, Bonus) → Datensatz in *Stellen und Bewerbungen* mit Status **Bewertet** (bei hartem Ausschluss **Nicht beworben**).\nEs geht nur der Anzeigentext und ein Kurzprofil ohne Kontaktdaten an Gemini. Nichts wird an Arbeitgeber gesendet.\nRegeln und Zahlen: claude/scorer-criteria.md (bestätigt 07.11.2026). Ändern nur im Knoten *Parameter*.\n**Writer-Schwelle:** Score >= 75 und kein Ausschluss. Der Writer läuft getrennt (Claude), dieser Workflow setzt nur die Daten."
-      }
+        -208,
+        224
+      ]
     },
     {
-      "id": "sc-form",
-      "name": "Formular",
-      "type": "n8n-nodes-base.formTrigger",
-      "typeVersion": 2.2,
-      "position": [
-        0,
-        400
-      ],
       "parameters": {
         "formTitle": "Scorer: Stellenanzeige bewerten",
         "formDescription": "Vollständigen Anzeigentext einfügen. Ergebnis landet in Airtable (Stellen und Bewerbungen).",
@@ -32,23 +24,17 @@
           "values": [
             {
               "fieldLabel": "Stellentitel",
-              "fieldType": "text",
               "requiredField": true
             },
             {
-              "fieldLabel": "Arbeitgeber",
-              "fieldType": "text",
-              "requiredField": false
+              "fieldLabel": "Arbeitgeber"
             },
             {
-              "fieldLabel": "Link zur Stelle",
-              "fieldType": "text",
-              "requiredField": false
+              "fieldLabel": "Link zur Stelle"
             },
             {
               "fieldLabel": "Gefunden über",
               "fieldType": "dropdown",
-              "requiredField": true,
               "fieldOptions": {
                 "values": [
                   {
@@ -70,7 +56,8 @@
                     "option": "Netzwerk"
                   }
                 ]
-              }
+              },
+              "requiredField": true
             },
             {
               "fieldLabel": "Anzeigentext",
@@ -83,59 +70,63 @@
         "options": {
           "buttonLabel": "Bewerten"
         }
-      }
+      },
+      "id": "2f3edf40-7659-4a30-b20f-f3828beed52f",
+      "name": "Formular",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        688
+      ],
+      "webhookId": "4d5ae99a-3ecd-46dc-be12-042d6e879388"
     },
     {
-      "id": "sc-exec",
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "id": "cbd5ac37-801f-4e7f-a5b3-24c5c3f92abd",
       "name": "Vom Job-Scout",
       "type": "n8n-nodes-base.executeWorkflowTrigger",
       "typeVersion": 1.1,
       "position": [
-        0,
-        620
-      ],
-      "parameters": {
-        "inputSource": "passthrough"
-      }
+        -176,
+        912
+      ]
     },
     {
-      "id": "sc-parameter",
+      "parameters": {
+        "jsCode": "// ===== Scorer v1.4 (10.11.2026): Parameter (nur hier ändern) =====\nconst MODEL = 'gemini-3.1-flash-lite';      // Hauptmodell (wie Employer-Scout v1.3.5)\nconst FALLBACK_MODEL = 'gemini-3.8-flash';  // Ersatz nach 3 Fehlversuchen\nconst TEMPERATURE = 0;\nconst WRITER_THRESHOLD = 75;                // ab diesem Score darf der Writer ein Anschreiben entwerfen\nconst MIN_SALARY = 0;     // eigenes Mindestgehalt eintragen (Euro brutto pro Jahr, Vollzeitäquivalent)\nconst MUST_CAP = 70;                        // fehlt eine Muss-Anforderung: Score höchstens 70 (Writer gesperrt)\n\n// Kurzprofil OHNE Kontaktdaten (nur das geht an Gemini). Quelle: skills-evidence.md, scorer-criteria.md\nconst PROFILE = `Kurzprofil OHNE Name und Kontaktdaten hier eintragen: Zielrollen, Wohnort/Bezugspunkt fuer den Arbeitsweg, Berufserfahrung mit konkreten Aufgaben, Weiterbildung, Tools, was NICHT vorhanden ist (nur als Luecke nennen), Sprachen, Abschluss, Verfuegbarkeit, Mindestgehalt ${MIN_SALARY} Euro brutto/Jahr.`;\n\n// Bewertungsregeln (bestätigt 2026-11-07, Ort/Sprache/Vertrieb präzisiert 2026-11-08)\nconst RULES = `Bewerte nach dem Aufgabenumfang (Scope), nicht nach dem Jobtitel.\nTeilwerte: scope 0-50, skills 0-20, language 0-10, location 0-10, conditions 0-10.\n- scope: Wie stark decken sich die Aufgaben der Anzeige mit der Erfahrung? Projektkoordination, Budget-/Kostenkontrolle, Leistungsnachweise, Dienstleistersteuerung, Reporting, Prozessoptimierung/Automatisierung = hoch. Reine Sekretariats-, Empfangs-, Kassen-, Payroll-, KYC-, Fraud- oder Store-Aufgaben = niedrig. Sind Vertrieb, Akquise oder Finanzierung durch Verkauf die Hauptverantwortung (auch wenn \"Projektmanager\" im Titel steht): scope höchstens 15.\n- skills: Passung bei Tools und Methoden, die als wünschenswert (\"idealerweise\", \"von Vorteil\", \"wünschenswert\", \"Plus\", \"nice to have\") genannt sind, plus allgemeine Werkzeug-Passung. Fehlende Tools nur als Lücke, nicht erfinden.\n- missing_must: Liste der Muss-Anforderungen, die im Profil fehlen. Muss = ohne Einschränkung gefordert (\"zwingend\", \"vorausgesetzt\", \"erforderlich\", \"Sie verfügen über\", \"Du bringst mit\" ohne \"idealerweise\"/\"von Vorteil\"/\"wünschenswert\"). Nur Software, Programmiersprachen, Methoden und Fachkenntnisse (z. B. SAP, Power BI, Python, Jira, Baurecht/HOAI, Bilanzierung nach HGB). NICHT aufnehmen: Zertifikate, Studienabschlüsse, Sprachkenntnisse, Jahre Berufserfahrung, Führerschein, Soft Skills und Standard-Bürosoftware (MS Office, Word, Outlook, Teams, Google Workspace). Berufsausbildung: nur dann aufnehmen, wenn sie zwingend verlangt ist und KEIN Studium als Alternative genannt wird (\"Ausbildung oder Studium\", \"oder vergleichbare Qualifikation\" = nicht aufnehmen). Werkzeug-Klassen: Verlangt die Anzeige ein Tool aus einer Klasse, die im Profil vorhanden ist (ein anderes CRM wie HubSpot, Pipedrive, Salesforce; ein Aufgaben-/Projekttool wie Asana, Jira, Trello, monday; eine Tabellenkalkulation wie Google Sheets; einen Automatisierungsbaukasten wie Power Automate), dann nur in gaps nennen, NICHT in missing_must. In missing_must gehört nur, was als ganze Klasse fehlt (z. B. SAP/ERP, Programmiersprache, Clay, Bilanzierung nach HGB/IFRS, Baurecht). Im Zweifel (Formulierung unklar) nicht aufnehmen, sondern in gaps nennen.\n- language: 10 wenn Deutsch C1 reicht (\"sehr gute\", \"fließende\", \"verhandlungssichere\" Deutschkenntnisse zählen als C1) oder Arbeitssprache Englisch; weniger nur, wenn ausdrücklich C2/Muttersprache verlangt wird oder viel gesprochenes Deutsch (Telefon, Präsentationen, Schulungen) Kern der Stelle ist.\n- location: Bezugspunkt REFERENCE_POINT. 10, wenn das Büro höchstens ca. 7 km entfernt ist (Bezirke im Radius hier eintragen) oder die Stelle vollständig remote ist (100 % Homeoffice, egal wo). 0 und harter Ausschluss, wenn Präsenz oder Hybrid verlangt wird und das Büro weiter weg ist (z. B. Spandau, Marzahn, Reinickendorf, Potsdam, Teltow, Kleinmachnow). Steht im Text eine Zeile \"Entfernung Büro – REFERENCE_POINT\", diese Zahl verwenden. Adresse unklar: 5 Punkte und in open_questions \"Büroadresse prüfen (max. 7 km vom REFERENCE_POINT)\".\n- conditions: Gehalt (sofern genannt) über Mindestgehalt, Festanstellung, Start passt (ab VERFUEGBAR_AB oder flexibel). Keine Angaben = 7. Liegt das genannte Gehalt (Vollzeit, Fixum) unter dem Mindestgehalt: höchstens 3. Start \"ab sofort\" oder früher als VERFUEGBAR_AB: KEIN Abzug, KEINE Lücke, keine offene Frage.\nStrafpunkte (penalties), nur wenn in der Anzeige klar gefordert, nicht bei \"wünschenswert\"/\"idealerweise\":\n- Programmierung (Python/TypeScript o. ä.) als Kernaufgabe: -15\n- Gesprochenes Deutsch als Kernaufgabe (Präsentationen, Schulungen, Moderation auf Deutsch): -15 bis -25 je nach Anteil\n- Deutsch ausdrücklich \"Muttersprache\"/\"muttersprachlich\" oder C2 gefordert: -8 (NICHT bei \"sehr gute\", \"fließende\" oder \"verhandlungssichere\" Deutschkenntnisse)\n- Technisches, naturwissenschaftliches oder IT-Studium gefordert (ohne \"oder vergleichbare Erfahrung\"): -5\n- Mehrjährige Berufserfahrung in einer technischen Rolle gefordert (z. B. Softwareentwicklung, IT-Administration, Data Engineering): -5\n- BWL-/Controlling-Studium zwingend gefordert: -5\n- Kern der Anzeige sind Negativ-Themen (Empfang, Rezeption, Kasse, Fraud, KYC, Payroll, Store, Sekretariat, Büromanagement, Assistenz der Geschäftsführung): -30\nBonus: interne Rolle ohne Kundenkontakt: +5.\nHarte Ausschlusskriterien (hard_exclusions), nur wenn als Anforderung formuliert: \"5+ Jahre Berufserfahrung in Deutschland\"; Personalverantwortung / Teamleitung; Büro mehr als ca. 7 km vom REFERENCE_POINT entfernt bei Präsenzpflicht oder Hybrid (nicht bei 100 % remote).\nEbenfalls harter Ausschluss: Arbeit mit Kunden oder am Telefon als fester Bestandteil der Stelle, z. B. Kundenbetreuung, Kundenservice, Kundenberatung, Account Management, Ansprechpartner/in für Kunden oder Mandanten, Hotline, Telefonakquise, regelmäßige Telefonate mit Kunden, Bewerbern oder Patienten, Vertrieb oder Akquise. Abstimmung mit internen Fachabteilungen, Kolleginnen oder Dienstleistern ist KEIN Ausschluss. Wird Kundenkontakt nur am Rande erwähnt, kein Ausschluss, aber in open_questions \"Anteil Kundenkontakt/Telefon klären\".\nKein Ausschluss, nur Lücke: fehlende Zertifikate (PMP, ITIL, PRINCE2), Zeitarbeit als Arbeitgeber, \"3+ Jahre Erfahrung\" ohne Bezug auf Deutschland (10+ Jahre Projektarbeit sind vorhanden).\nGehalt: Alle Beträge in Euro. salary_max_eur = der höchste in der Anzeige genannte Betrag als Jahresbrutto in Euro für Vollzeit (Monatsgehalt x 12; bei Teilzeit auf Vollzeit hochrechnen, wenn die Stundenzahl genannt ist). Kein Gehalt genannt, nur Stundenlohn oder nicht sicher umrechenbar: salary_max_eur = null. Den Ausschluss bei weniger als ${MIN_SALARY} Euro setzt der Code, NICHT in hard_exclusions schreiben. Fehlt das Gehalt: open_questions \"Gehalt erfragen\" (kein Abzug, kein Ausschluss).`;\n\nconst f = $input.first().json;\nconst adText = String(f['Anzeigentext'] || '').trim();\nif (adText.length < 200) throw new Error('Anzeigentext ist zu kurz (' + adText.length + ' Zeichen). Bitte den vollständigen Text der Stellenanzeige einfügen.');\n\nreturn [{ json: {\n  model: MODEL, fallback_model: FALLBACK_MODEL, temperature: TEMPERATURE,\n  writer_threshold: WRITER_THRESHOLD, min_salary: MIN_SALARY, must_cap: MUST_CAP,\n  profile: PROFILE, rules: RULES,\n  title: String(f['Stellentitel'] || '').trim(),\n  employer: String(f['Arbeitgeber'] || '').trim(),\n  url: String(f['Link zur Stelle'] || '').trim(),\n  source: String(f['Gefunden über'] || 'Nischenportal'),\n  ad_text: adText.slice(0, 20000),\n} }];\n"
+      },
+      "id": "5d8eceec-4760-42d1-adf6-f859784765e2",
       "name": "Parameter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        400
+        80,
+        688
       ],
-      "parameters": {
-        "jsCode": "// ===== Scorer v1: Parameter (nur hier ändern) =====\nconst MODEL = 'gemini-3.1-flash-lite';      // Hauptmodell (wie Employer-Scout v1.3.5)\nconst FALLBACK_MODEL = 'gemini-3.8-flash';  // Ersatz nach 3 Fehlversuchen\nconst TEMPERATURE = 0;\nconst WRITER_THRESHOLD = 75;                // ab diesem Score darf der Writer ein Anschreiben entwerfen\nconst MIN_SALARY = 0;     // eigenes Mindestgehalt eintragen                   // Euro brutto pro Jahr, Vollzeitäquivalent\n\n// Kurzprofil OHNE Kontaktdaten (nur das geht an Gemini). Quelle: skills-evidence.md, scorer-criteria.md\nconst PROFILE = `Kurzprofil OHNE Name und Kontaktdaten hier eintragen: Zielrollen, Wohnort/Bezugspunkt fuer den Arbeitsweg, Berufserfahrung mit konkreten Aufgaben, Weiterbildung, Tools, was NICHT vorhanden ist (nur als Luecke nennen), Sprachen, Abschluss, Verfuegbarkeit, Mindestgehalt ${MIN_SALARY} Euro brutto/Jahr.`;\n\n// Bewertungsregeln (bestätigt 2026-11-07, Ort/Sprache/Vertrieb präzisiert 2026-11-08)\nconst RULES = `Bewerte nach dem Aufgabenumfang (Scope), nicht nach dem Jobtitel.\nTeilwerte: scope 0-50, skills 0-20, language 0-10, location 0-10, conditions 0-10.\n- scope: Wie stark decken sich die Aufgaben der Anzeige mit der Erfahrung? Projektkoordination, Budget-/Kostenkontrolle, Leistungsnachweise, Dienstleistersteuerung, Reporting, Prozessoptimierung/Automatisierung = hoch. Reine Sekretariats-, Empfangs-, Kassen-, Payroll-, KYC-, Fraud- oder Store-Aufgaben = niedrig. Sind Vertrieb, Akquise oder Finanzierung durch Verkauf die Hauptverantwortung (auch wenn \"Projektmanager\" im Titel steht): scope höchstens 15.\n- skills: geforderte Tools und Methoden, die laut Profil vorhanden sind. Fehlende Tools nur als Lücke, nicht erfinden.\n- language: 10 wenn Deutsch C1 reicht (\"sehr gute\", \"fließende\", \"verhandlungssichere\" Deutschkenntnisse zählen als C1) oder Arbeitssprache Englisch; weniger nur, wenn ausdrücklich C2/Muttersprache verlangt wird oder viel gesprochenes Deutsch (Telefon, Präsentationen, Schulungen) Kern der Stelle ist.\n- location: Bezugspunkt REFERENCE_POINT. 10, wenn das Büro höchstens ca. 7 km entfernt ist (Bezirke im Radius hier eintragen) oder die Stelle vollständig remote ist (100 % Homeoffice, egal wo). 0 und harter Ausschluss, wenn Präsenz oder Hybrid verlangt wird und das Büro weiter weg ist (z. B. Spandau, Marzahn, Reinickendorf, Potsdam, Teltow, Kleinmachnow). Steht im Text eine Zeile \"Entfernung Büro – REFERENCE_POINT\", diese Zahl verwenden. Adresse unklar: 5 Punkte und in open_questions \"Büroadresse prüfen (max. 7 km vom REFERENCE_POINT)\".\n- conditions: Gehalt (sofern genannt) über Mindestgehalt, Festanstellung, Start passt (ab 03/2027 oder flexibel). Keine Angaben = 7. Liegt das genannte Gehalt (Vollzeit, Fixum) unter dem Mindestgehalt: höchstens 3.\nStrafpunkte (penalties), nur wenn in der Anzeige klar gefordert, nicht bei \"wünschenswert\"/\"idealerweise\":\n- Programmierung (Python/TypeScript o. ä.) als Kernaufgabe: -15\n- Gesprochenes Deutsch als Kernaufgabe (Kundentelefonate, Präsentationen, Schulungen auf Deutsch): -15 bis -25 je nach Anteil\n- Deutsch ausdrücklich \"Muttersprache\"/\"muttersprachlich\" oder C2 gefordert: -8 (NICHT bei \"sehr gute\", \"fließende\" oder \"verhandlungssichere\" Deutschkenntnisse)\n- Technisches oder naturwissenschaftliches Studium gefordert (ohne \"oder vergleichbare Erfahrung\"): -5\n- SAP/ERP als Kernanforderung: -10\n- BWL-/Controlling-Studium zwingend gefordert: -5\n- Kern der Anzeige sind Negativ-Themen (Empfang, Rezeption, Kasse, Fraud, KYC, Payroll, Store, Sekretariat, Büromanagement, Assistenz der Geschäftsführung): -30\nBonus: interne Rolle ohne Kundenkontakt: +5.\nHarte Ausschlusskriterien (hard_exclusions), nur wenn als Anforderung formuliert: \"5+ Jahre Berufserfahrung in Deutschland\"; Personalverantwortung / Teamleitung; Büro mehr als ca. 7 km vom REFERENCE_POINT entfernt bei Präsenzpflicht oder Hybrid (nicht bei 100 % remote).\nKein Ausschluss, nur Lücke: fehlende Zertifikate (PMP, ITIL, PRINCE2), Zeitarbeit als Arbeitgeber, \"3+ Jahre Erfahrung\" ohne Bezug auf Deutschland (10+ Jahre Projektarbeit sind vorhanden).\nGehalt: steht eine Spanne in der Anzeige und ihr oberes Ende liegt unter ${MIN_SALARY} Euro, in open_questions \"Gehalt unter Minimum\" vermerken (kein Ausschluss). Fehlt das Gehalt: open_questions \"Gehalt erfragen\".`;\n\nconst f = $input.first().json;\nconst adText = String(f['Anzeigentext'] || '').trim();\nif (adText.length < 200) throw new Error('Anzeigentext ist zu kurz (' + adText.length + ' Zeichen). Bitte den vollständigen Text der Stellenanzeige einfügen.');\n\nreturn [{ json: {\n  model: MODEL, fallback_model: FALLBACK_MODEL, temperature: TEMPERATURE,\n  writer_threshold: WRITER_THRESHOLD, min_salary: MIN_SALARY,\n  profile: PROFILE, rules: RULES,\n  title: String(f['Stellentitel'] || '').trim(),\n  employer: String(f['Arbeitgeber'] || '').trim(),\n  url: String(f['Link zur Stelle'] || '').trim(),\n  source: String(f['Gefunden über'] || 'Nischenportal'),\n  ad_text: adText.slice(0, 20000),\n} }];\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
-      "id": "sc-prompt",
+      "parameters": {
+        "jsCode": "// Scorer v1.4: baut den EINEN Gemini-Aufruf. Keine Kontaktdaten im Prompt.\nconst p = $input.first().json;\n\nconst prompt = `Du bist ein nüchterner Bewerbungs-Scorer. Du vergleichst eine Stellenanzeige mit einem Kandidatenprofil und bewertest die Passung nach festen Regeln. Du erfindest keine Fähigkeiten, die nicht im Profil stehen. Antworte ausschließlich als JSON nach dem vorgegebenen Schema, alle Texte auf Deutsch, kurz und konkret.\n\n=== KANDIDATENPROFIL ===\n${p.profile}\n\n=== BEWERTUNGSREGELN ===\n${p.rules}\n\n=== STELLENANZEIGE ===\nTitel: ${p.title || '(nicht angegeben)'}\nArbeitgeber: ${p.employer || '(nicht angegeben)'}\nText:\n${p.ad_text}\n\n=== AUSGABE ===\n- scope, skills, language, location, conditions: ganze Zahlen in den genannten Bereichen.\n- penalties: Liste von {reason, points} mit negativen Zahlen (points), nur Regeln aus der Liste, nur wenn in der Anzeige klar gefordert. Leere Liste, wenn nichts zutrifft.\n- missing_must: Liste fehlender Muss-Anforderungen nach der Regel oben, je ein kurzer Eintrag mit Zitat aus der Anzeige; leer, wenn keine.\n- bonus_internal: true nur bei interner Rolle ohne Kundenkontakt.\n- hard_exclusions: Liste kurzer deutscher Sätze mit Zitat aus der Anzeige; leer, wenn keins zutrifft.\n- scope_summary: 3-6 Zeilen, die Hauptaufgaben der Stelle in eigenen Worten.\n- matches: 3-8 Stichpunkte, was aus dem Profil zu den Aufgaben passt (mit Bezug auf die konkrete Erfahrung).\n- gaps: Stichpunkte, was IN DER ANZEIGE gefordert oder genannt ist und im Profil fehlt oder schwach ist. Nichts beschönigen. Nichts nennen, was die Anzeige nicht erwähnt.\n- open_questions: offene Punkte für die Kandidatin (Gehalt, Start, Arbeitsort, Teilzeit, unklare Anforderungen).\n- work_mode: \"Remote\", \"Hybrid\", \"Vor Ort\" oder null.\n- salary_in_ad: genannte Gehaltsangabe als Text oder null.\n- salary_max_eur: ganze Zahl nach der Gehaltsregel oben oder null.`;\n\nconst schema = {\n  type: 'OBJECT',\n  properties: {\n    scope: { type: 'INTEGER' }, skills: { type: 'INTEGER' }, language: { type: 'INTEGER' },\n    location: { type: 'INTEGER' }, conditions: { type: 'INTEGER' },\n    penalties: { type: 'ARRAY', items: { type: 'OBJECT', properties: { reason: { type: 'STRING' }, points: { type: 'INTEGER' } }, required: ['reason', 'points'] } },\n    missing_must: { type: 'ARRAY', items: { type: 'STRING' } },\n    bonus_internal: { type: 'BOOLEAN' },\n    hard_exclusions: { type: 'ARRAY', items: { type: 'STRING' } },\n    scope_summary: { type: 'STRING' },\n    matches: { type: 'ARRAY', items: { type: 'STRING' } },\n    gaps: { type: 'ARRAY', items: { type: 'STRING' } },\n    open_questions: { type: 'ARRAY', items: { type: 'STRING' } },\n    work_mode: { type: 'STRING', nullable: true, enum: ['Remote', 'Hybrid', 'Vor Ort'] },\n    salary_in_ad: { type: 'STRING', nullable: true },\n    salary_max_eur: { type: 'INTEGER', nullable: true },\n  },\n  required: ['scope', 'skills', 'language', 'location', 'conditions', 'penalties', 'missing_must', 'bonus_internal', 'hard_exclusions', 'scope_summary', 'matches', 'gaps', 'open_questions', 'work_mode', 'salary_in_ad', 'salary_max_eur'],\n};\n\nconst body = {\n  contents: [{ role: 'user', parts: [{ text: prompt }] }],\n  generationConfig: { temperature: p.temperature, maxOutputTokens: 8192, responseMimeType: 'application/json', responseSchema: schema },\n};\nreturn [{ json: { body } }];\n"
+      },
+      "id": "875a6a07-8c09-48fa-a93d-91bccf4588bc",
       "name": "Prompt bauen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        480,
-        400
-      ],
-      "parameters": {
-        "jsCode": "// Baut den EINEN Gemini-Aufruf. Keine Kontaktdaten im Prompt.\nconst p = $input.first().json;\n\nconst prompt = `Du bist ein nüchterner Bewerbungs-Scorer. Du vergleichst eine Stellenanzeige mit einem Kandidatenprofil und bewertest die Passung nach festen Regeln. Du erfindest keine Fähigkeiten, die nicht im Profil stehen. Antworte ausschließlich als JSON nach dem vorgegebenen Schema, alle Texte auf Deutsch, kurz und konkret.\n\n=== KANDIDATENPROFIL ===\n${p.profile}\n\n=== BEWERTUNGSREGELN ===\n${p.rules}\n\n=== STELLENANZEIGE ===\nTitel: ${p.title || '(nicht angegeben)'}\nArbeitgeber: ${p.employer || '(nicht angegeben)'}\nText:\n${p.ad_text}\n\n=== AUSGABE ===\n- scope, skills, language, location, conditions: ganze Zahlen in den genannten Bereichen.\n- penalties: Liste von {reason, points} mit negativen Zahlen (points), nur Regeln aus der Liste, nur wenn in der Anzeige klar gefordert. Leere Liste, wenn nichts zutrifft.\n- bonus_internal: true nur bei interner Rolle ohne Kundenkontakt.\n- hard_exclusions: Liste kurzer deutscher Sätze mit Zitat aus der Anzeige; leer, wenn keins zutrifft.\n- scope_summary: 3-6 Zeilen, die Hauptaufgaben der Stelle in eigenen Worten.\n- matches: 3-8 Stichpunkte, was aus dem Profil zu den Aufgaben passt (mit Bezug auf die konkrete Erfahrung).\n- gaps: Stichpunkte, was gefordert ist und im Profil fehlt oder schwach ist. Nichts beschönigen.\n- open_questions: offene Punkte für die Kandidatin (Gehalt, Start, Arbeitsort, Teilzeit, unklare Anforderungen).\n- work_mode: \"Remote\", \"Hybrid\", \"Vor Ort\" oder null.\n- salary_in_ad: genannte Gehaltsangabe als Text oder null.`;\n\nconst schema = {\n  type: 'OBJECT',\n  properties: {\n    scope: { type: 'INTEGER' }, skills: { type: 'INTEGER' }, language: { type: 'INTEGER' },\n    location: { type: 'INTEGER' }, conditions: { type: 'INTEGER' },\n    penalties: { type: 'ARRAY', items: { type: 'OBJECT', properties: { reason: { type: 'STRING' }, points: { type: 'INTEGER' } }, required: ['reason', 'points'] } },\n    bonus_internal: { type: 'BOOLEAN' },\n    hard_exclusions: { type: 'ARRAY', items: { type: 'STRING' } },\n    scope_summary: { type: 'STRING' },\n    matches: { type: 'ARRAY', items: { type: 'STRING' } },\n    gaps: { type: 'ARRAY', items: { type: 'STRING' } },\n    open_questions: { type: 'ARRAY', items: { type: 'STRING' } },\n    work_mode: { type: 'STRING', nullable: true, enum: ['Remote', 'Hybrid', 'Vor Ort'] },\n    salary_in_ad: { type: 'STRING', nullable: true },\n  },\n  required: ['scope', 'skills', 'language', 'location', 'conditions', 'penalties', 'bonus_internal', 'hard_exclusions', 'scope_summary', 'matches', 'gaps', 'open_questions', 'work_mode', 'salary_in_ad'],\n};\n\nconst body = {\n  contents: [{ role: 'user', parts: [{ text: prompt }] }],\n  generationConfig: { temperature: p.temperature, maxOutputTokens: 8192, responseMimeType: 'application/json', responseSchema: schema },\n};\nreturn [{ json: { body } }];\n"
-      }
-    },
-    {
-      "id": "sc-gemini",
-      "name": "Gemini",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        720,
-        400
+        320,
+        688
       ],
       "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 15000,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
+    },
+    {
       "parameters": {
         "method": "POST",
         "url": "={{ 'https://generativelanguage.googleapis.com/v1beta/models/' + $('Parameter').first().json.model + ':generateContent' }}",
@@ -148,25 +139,26 @@
           "timeout": 120000
         }
       },
+      "id": "e92bac74-023d-49a8-a67a-11bfbe2dc025",
+      "name": "Gemini",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        688
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 15000,
       "credentials": {
         "googlePalmApi": {
+          "id": "fTMkxJ8MqP7O2dks",
           "name": "Gemini – Jobsuche"
         }
       },
       "onError": "continueErrorOutput"
     },
     {
-      "id": "sc-gemini-ersatz",
-      "name": "Gemini Ersatz",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        720,
-        620
-      ],
-      "retryOnFail": true,
-      "maxTries": 3,
-      "waitBetweenTries": 10000,
       "parameters": {
         "method": "POST",
         "url": "={{ 'https://generativelanguage.googleapis.com/v1beta/models/' + $('Parameter').first().json.fallback_model + ':generateContent' }}",
@@ -179,35 +171,41 @@
           "timeout": 120000
         }
       },
+      "id": "009818d1-f688-48e2-80f8-840d14349a0f",
+      "name": "Gemini Ersatz",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        560,
+        912
+      ],
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 10000,
       "credentials": {
         "googlePalmApi": {
+          "id": "fTMkxJ8MqP7O2dks",
           "name": "Gemini – Jobsuche"
         }
       }
     },
     {
-      "id": "sc-bewerten",
+      "parameters": {
+        "jsCode": "// Scorer v1.4 (10.11.2026): Gemini-Antwort lesen, Score deterministisch berechnen, Airtable-Datensatz bauen.\nconst p = $('Parameter').first().json;\nconst r = $input.first().json;\nlet fb = false;\ntry { fb = $('Gemini Ersatz').isExecuted; } catch (e) { fb = false; }\n\nif (r.error) throw new Error('Gemini-Fehler: ' + JSON.stringify(r.error).slice(0, 500));\nconst cand = (r.candidates || [])[0];\nif (!cand) throw new Error('Gemini hat keine Antwort geliefert: ' + JSON.stringify(r).slice(0, 500));\nconst text = ((cand.content || {}).parts || []).map(x => x.text || '').join('').trim();\nlet d;\ntry { d = JSON.parse(text.replace(/^```(?:json)?\\s*/i, '').replace(/```\\s*$/, '')); }\ncatch (e) { throw new Error(`Antwort ist kein gültiges JSON (finishReason: ${cand.finishReason}). Anfang: ${text.slice(0, 300)}`); }\n\nconst clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(Number(v) || 0)));\nconst parts = {\n  scope: clamp(d.scope, 0, 50), skills: clamp(d.skills, 0, 20), language: clamp(d.language, 0, 10),\n  location: clamp(d.location, 0, 10), conditions: clamp(d.conditions, 0, 10),\n};\nconst base = parts.scope + parts.skills + parts.language + parts.location + parts.conditions;\n\n// Strafpunkte: nur negative Werte, jede einzelne auf -30 begrenzt, Summe auf -60\nconst penalties = (Array.isArray(d.penalties) ? d.penalties : [])\n  .map(x => ({ reason: String((x && x.reason) || '').trim(), points: clamp(-Math.abs((x && x.points) || 0), -30, 0) }))\n  .filter(x => x.reason && x.points < 0);\nlet penaltySum = Math.max(-60, penalties.reduce((s, x) => s + x.points, 0));\nconst bonus = d.bonus_internal === true ? 5 : 0;\nconst hard = (Array.isArray(d.hard_exclusions) ? d.hard_exclusions : []).map(s => String(s).trim()).filter(Boolean);\n\n// v1.4: Gehalt. Nennt die Anzeige ein Jahresgehalt (Vollzeit) unter dem Minimum: harter Ausschluss. Kein Gehalt = kein Ausschluss.\nconst salMax = Number(d.salary_max_eur);\nif (salMax >= 10000 && salMax < p.min_salary) hard.push(`Gehalt unter ${p.min_salary} € (laut Anzeige höchstens ${salMax} €` + (d.salary_in_ad ? `: \"${String(d.salary_in_ad).slice(0, 80)}\"` : '') + ')');\n\n// v1.4: Muss-Lücken im Code nachfiltern (das Modell hält die Ausnahmen nicht zuverlässig ein).\n// Deckeln darf nur, was als ganze Klasse fehlt. Alles andere wandert in die normalen Lücken.\nconst KEEP = /\\bsap\\b|\\berp\\b|python|\\bsql\\b|javascript|typescript|\\bjava\\b|\\bvba\\b|\\bhgb\\b|\\bifrs\\b|bilanz|\\bhoai\\b|baurecht|vergaberecht|\\bvob\\b|datev|\\bclay\\b|power bi|tableau/i;\nconst NO_CAP = [\n  /studium|studienabschluss|hochschulabschluss|bachelor|diplom|master(abschluss|-abschluss|studium| of )|abgeschlossene[ns]? (ausbildung|berufsausbildung)[^.;]*\\boder\\b/i,   // Abschlüsse, Ausbildung mit Alternative\n  /\\d\\s*\\+?\\s*(jahre|jahren|years)|mehrjährig|langjährig|berufserfahrung|work experience/i,                  // Jahre Erfahrung\n  /führerschein|fahrerlaubnis|driving licen/i,                                                               // Führerschein (vorhanden)\n  /deutsch|englisch|english|german|sprachkenntnis|sprachniveau|muttersprach|\\b[bc][12]\\b/i,                   // Sprachen (eigener Teilwert)\n  /zertifi|certif|\\bpmp\\b|prince2|\\bitil\\b|scrum master/i,                                                   // Zertifikate\n  /ms[- ]office|microsoft office|office[- ]?365|microsoft 365|\\bm365\\b|outlook|\\bword\\b|powerpoint|\\bteams\\b|google workspace/i,  // Standard-Bürosoftware\n  /hubspot|pipedrive|salesforce|\\bcrm\\b|asana|\\bjira\\b|trello|monday|clickup|google sheets|power automate|\\bzapier\\b|\\bmake\\b|\\bn8n\\b/i,  // Tool aus einer bekannten Klasse\n];\nconst mustRaw = (Array.isArray(d.missing_must) ? d.missing_must : []).map(s => String(s).trim()).filter(Boolean);\nconst mustMissing = [], mustDropped = [];\nfor (const m of mustRaw) (!KEEP.test(m) && NO_CAP.some(re => re.test(m)) ? mustDropped : mustMissing).push(m);\nlet score = clamp(base + penaltySum + bonus, 0, 100);\nconst capped = mustMissing.length > 0 && score > p.must_cap;\nif (mustMissing.length) score = Math.min(score, p.must_cap);\nconst excluded = hard.length > 0;\nconst writerOk = !excluded && score >= p.writer_threshold;\n\nconst list = a => (Array.isArray(a) ? a : []).map(s => '- ' + String(s).trim()).filter(s => s.length > 2).join('\\n');\nconst today = $now.toFormat('yyyy-MM-dd');\nconst modelUsed = r.modelVersion || (fb ? p.fallback_model : p.model);\n\nconst hardText = excluded\n  ? 'AUSSCHLUSS:\\n' + list(hard)\n  : 'Kein hartes Ausschlusskriterium erkannt.';\nconst calc = [\n  `Scope ${parts.scope}/50, Skills ${parts.skills}/20, Sprache ${parts.language}/10, Ort ${parts.location}/10, Bedingungen ${parts.conditions}/10 = ${base}`,\n  penalties.length ? 'Strafpunkte: ' + penalties.map(x => `${x.points} (${x.reason})`).join('; ') : 'Strafpunkte: keine',\n  bonus ? 'Bonus interne Rolle: +5' : null,\n  mustMissing.length ? `Muss-Anforderung fehlt: ${mustMissing.join('; ')} -> Score höchstens ${p.must_cap}` + (capped ? ' (gedeckelt)' : '') : null,\n  `Score: ${score}` + (excluded ? ' (Ausschluss, Writer gesperrt)' : writerOk ? ` (>= ${p.writer_threshold}: Writer darf entwerfen)` : ` (< ${p.writer_threshold}: kein Anschreiben)`),\n  d.work_mode ? `Arbeitsmodus laut Anzeige: ${d.work_mode}` : 'Arbeitsmodus laut Anzeige: unklar',\n  d.salary_in_ad ? `Gehalt laut Anzeige: ${d.salary_in_ad}` + (salMax >= 10000 ? ` (max. ${salMax} €/Jahr)` : '') : null,\n  mustDropped.length ? `Nicht als Muss gewertet (nur Lücke): ${mustDropped.join('; ')}` : null,\n  p.employer ? `Arbeitgeber: ${p.employer}` : null,\n  `Scorer v1.4, ${today}, Modell ${modelUsed}${fb ? ' (Ersatzmodell)' : ''}`,\n].filter(Boolean).join('\\n');\n\nconst fields = {\n  fldvi9NOQkjarh6Xp: [p.title || 'Stelle ohne Titel', p.employer].filter(Boolean).join(' – '),  // Stellentitel\n  fld2I3y1rPj2PLr5G: /^https?:\\/\\//i.test(p.url) ? p.url : null,   // Link zur Stelle\n  fld67zsuzjVMWlHj4: p.source,                                       // Gefunden über\n  fldF286BWjQsP97ZU: String(d.scope_summary || '').trim() || null,  // Scope\n  fldHbj2xOfzOGlFCL: score,                                          // Score (0 bis 100)\n  fldDJXhcgXbVanYcF: list(d.matches) || null,                        // Treffer\n  fldEWzhj9RXDUveLY: [mustMissing.length ? 'MUSS fehlt:\\n' + list(mustMissing) : '', list(mustDropped.concat(Array.isArray(d.gaps) ? d.gaps : []))].filter(Boolean).join('\\n') || null,  // Lücken\n  fldgFDKMAUQiY9utM: hardText,                                       // Harte Kriterien (Risiko)\n  fldtvWymZSuRBDJYc: excluded ? 'Nicht beworben' : 'Bewertet',       // Status\n  fldGLAKchtHtA6nGP: today,                                          // Entdeckt am\n  fldSB3KbrVVJhGRBh: list(d.open_questions) || null,                 // Offene Fragen\n  fldoRHnPAxTlxXJkQ: calc,                                           // Notizen\n};\nfor (const k of Object.keys(fields)) if (fields[k] === null || fields[k] === undefined) delete fields[k];\n\nreturn [{ json: { records: [{ fields }], _result: { score, excluded, writerOk, parts, penalties, bonus, hard, mustMissing, mustDropped, salaryMax: salMax || null, model: modelUsed, usage: r.usageMetadata || null, finishReason: cand.finishReason || null } } }];\n"
+      },
+      "id": "232e0c6f-f365-4237-b2fa-450ae9c08ace",
       "name": "Bewerten",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        960,
-        400
+        800,
+        688
       ],
-      "parameters": {
-        "jsCode": "// Gemini-Antwort lesen, Score deterministisch berechnen, Airtable-Datensatz bauen.\nconst p = $('Parameter').first().json;\nconst r = $input.first().json;\nlet fb = false;\ntry { fb = $('Gemini Ersatz').isExecuted; } catch (e) { fb = false; }\n\nif (r.error) throw new Error('Gemini-Fehler: ' + JSON.stringify(r.error).slice(0, 500));\nconst cand = (r.candidates || [])[0];\nif (!cand) throw new Error('Gemini hat keine Antwort geliefert: ' + JSON.stringify(r).slice(0, 500));\nconst text = ((cand.content || {}).parts || []).map(x => x.text || '').join('').trim();\nlet d;\ntry { d = JSON.parse(text.replace(/^```(?:json)?\\s*/i, '').replace(/```\\s*$/, '')); }\ncatch (e) { throw new Error(`Antwort ist kein gültiges JSON (finishReason: ${cand.finishReason}). Anfang: ${text.slice(0, 300)}`); }\n\nconst clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(Number(v) || 0)));\nconst parts = {\n  scope: clamp(d.scope, 0, 50), skills: clamp(d.skills, 0, 20), language: clamp(d.language, 0, 10),\n  location: clamp(d.location, 0, 10), conditions: clamp(d.conditions, 0, 10),\n};\nconst base = parts.scope + parts.skills + parts.language + parts.location + parts.conditions;\n\n// Strafpunkte: nur negative Werte, jede einzelne auf -30 begrenzt, Summe auf -60\nconst penalties = (Array.isArray(d.penalties) ? d.penalties : [])\n  .map(x => ({ reason: String((x && x.reason) || '').trim(), points: clamp(-Math.abs((x && x.points) || 0), -30, 0) }))\n  .filter(x => x.reason && x.points < 0);\nlet penaltySum = Math.max(-60, penalties.reduce((s, x) => s + x.points, 0));\nconst bonus = d.bonus_internal === true ? 5 : 0;\nconst hard = (Array.isArray(d.hard_exclusions) ? d.hard_exclusions : []).map(s => String(s).trim()).filter(Boolean);\n\nlet score = clamp(base + penaltySum + bonus, 0, 100);\nconst excluded = hard.length > 0;\nconst writerOk = !excluded && score >= p.writer_threshold;\n\nconst list = a => (Array.isArray(a) ? a : []).map(s => '- ' + String(s).trim()).filter(s => s.length > 2).join('\\n');\nconst today = $now.toFormat('yyyy-MM-dd');\nconst modelUsed = r.modelVersion || (fb ? p.fallback_model : p.model);\n\nconst hardText = excluded\n  ? 'AUSSCHLUSS:\\n' + list(hard)\n  : 'Kein hartes Ausschlusskriterium erkannt.';\nconst calc = [\n  `Scope ${parts.scope}/50, Skills ${parts.skills}/20, Sprache ${parts.language}/10, Ort ${parts.location}/10, Bedingungen ${parts.conditions}/10 = ${base}`,\n  penalties.length ? 'Strafpunkte: ' + penalties.map(x => `${x.points} (${x.reason})`).join('; ') : 'Strafpunkte: keine',\n  bonus ? 'Bonus interne Rolle: +5' : null,\n  `Score: ${score}` + (excluded ? ' (Ausschluss, Writer gesperrt)' : writerOk ? ` (>= ${p.writer_threshold}: Writer darf entwerfen)` : ` (< ${p.writer_threshold}: kein Anschreiben)`),\n  d.work_mode ? `Arbeitsmodus laut Anzeige: ${d.work_mode}` : 'Arbeitsmodus laut Anzeige: unklar',\n  d.salary_in_ad ? `Gehalt laut Anzeige: ${d.salary_in_ad}` : null,\n  p.employer ? `Arbeitgeber: ${p.employer}` : null,\n  `Scorer v1.2, ${today}, Modell ${modelUsed}${fb ? ' (Ersatzmodell)' : ''}`,\n].filter(Boolean).join('\\n');\n\nconst fields = {\n  fldvi9NOQkjarh6Xp: [p.title || 'Stelle ohne Titel', p.employer].filter(Boolean).join(' – '),  // Stellentitel\n  fld2I3y1rPj2PLr5G: /^https?:\\/\\//i.test(p.url) ? p.url : null,   // Link zur Stelle\n  fld67zsuzjVMWlHj4: p.source,                                       // Gefunden über\n  fldF286BWjQsP97ZU: String(d.scope_summary || '').trim() || null,  // Scope\n  fldHbj2xOfzOGlFCL: score,                                          // Score (0 bis 100)\n  fldDJXhcgXbVanYcF: list(d.matches) || null,                        // Treffer\n  fldEWzhj9RXDUveLY: list(d.gaps) || null,                           // Lücken\n  fldgFDKMAUQiY9utM: hardText,                                       // Harte Kriterien (Risiko)\n  fldtvWymZSuRBDJYc: excluded ? 'Nicht beworben' : 'Bewertet',       // Status\n  fldGLAKchtHtA6nGP: today,                                          // Entdeckt am\n  fldSB3KbrVVJhGRBh: list(d.open_questions) || null,                 // Offene Fragen\n  fldoRHnPAxTlxXJkQ: calc,                                           // Notizen\n};\nfor (const k of Object.keys(fields)) if (fields[k] === null || fields[k] === undefined) delete fields[k];\n\nreturn [{ json: { records: [{ fields }], _result: { score, excluded, writerOk, parts, penalties, bonus, hard, model: modelUsed, usage: r.usageMetadata || null, finishReason: cand.finishReason || null } } }];\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     },
     {
-      "id": "sc-airtable",
-      "name": "In Airtable speichern",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1200,
-        400
-      ],
-      "onError": "continueRegularOutput",
       "parameters": {
         "method": "POST",
         "url": "https://api.airtable.com/v0/YOUR_AIRTABLE_BASE_ID/YOUR_JOBS_TABLE_ID",
@@ -220,24 +218,37 @@
           "timeout": 30000
         }
       },
+      "id": "475e9c07-9550-43cd-8e8f-e4cf6fd34700",
+      "name": "In Airtable speichern",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        688
+      ],
       "credentials": {
         "airtableTokenApi": {
+          "id": "UsXzqEWX18Q293Vh",
           "name": "Airtable Jobsuche"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
-      "id": "sc-summary",
+      "parameters": {
+        "jsCode": "// Zusammenfassung des Laufs (Ausgabe für das Formular und für Tests).\nconst p = $('Parameter').first().json;\nconst res = $('Bewerten').first().json._result;\nconst save = $input.first().json;\nconst saved = (save.records || [])[0];\nconst err = save.error ? JSON.stringify(save.error).slice(0, 300) : null;\n\nreturn [{ json: {\n  'Stelle': [p.title, p.employer].filter(Boolean).join(' – '),\n  'Score': res.score,\n  'Teilwerte': res.parts,\n  'Strafpunkte': res.penalties,\n  'Bonus': res.bonus,\n  'Harter Ausschluss': res.hard,\n  'Muss-Lücken': res.mustMissing || [],\n  ['Writer freigegeben (>= ' + p.writer_threshold + ')']: res.writerOk,\n  'Airtable-Datensatz': saved ? saved.id : null,\n  'Speicherfehler': err,\n  'Modell': res.model,\n  'Gemini-Tokens': res.usage ? res.usage.totalTokenCount : null,\n  'Gemini-Abbruchgrund': res.finishReason,\n} }];\n"
+      },
+      "id": "ae73949e-421b-405a-bb1e-d8665d474732",
       "name": "Zusammenfassung",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1440,
-        400
+        1280,
+        688
       ],
-      "parameters": {
-        "jsCode": "// Zusammenfassung des Laufs (Ausgabe für das Formular und für Tests).\nconst p = $('Parameter').first().json;\nconst res = $('Bewerten').first().json._result;\nconst save = $input.first().json;\nconst saved = (save.records || [])[0];\nconst err = save.error ? JSON.stringify(save.error).slice(0, 300) : null;\n\nreturn [{ json: {\n  'Stelle': [p.title, p.employer].filter(Boolean).join(' – '),\n  'Score': res.score,\n  'Teilwerte': res.parts,\n  'Strafpunkte': res.penalties,\n  'Bonus': res.bonus,\n  'Harter Ausschluss': res.hard,\n  ['Writer freigegeben (>= ' + p.writer_threshold + ')']: res.writerOk,\n  'Airtable-Datensatz': saved ? saved.id : null,\n  'Speicherfehler': err,\n  'Modell': res.model,\n  'Gemini-Tokens': res.usage ? res.usage.totalTokenCount : null,\n  'Gemini-Abbruchgrund': res.finishReason,\n} }];\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000
     }
   ],
   "connections": {
@@ -339,9 +350,11 @@
   },
   "settings": {
     "executionOrder": "v1",
-    "timezone": "Europe/Berlin",
-    "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all"
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "saveDataSuccessExecution": "all",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
   },
   "pinData": {}
 }

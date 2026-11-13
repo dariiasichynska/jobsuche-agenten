@@ -1,5 +1,5 @@
 {
-  "name": "Nachfassen-Erinnerung (Telegram) v1.1",
+  "name": "Nachfassen-Erinnerung (Telegram) v1.3",
   "nodes": [
     {
       "id": "nf-note",
@@ -12,8 +12,8 @@
       ],
       "parameters": {
         "width": 900,
-        "height": 300,
-        "content": "## Nachfassen-Erinnerung (Telegram) v1.1 (Telegram HTML-Modus, Sonderzeichen escaped)\n**Einrichten:**\n1. Im Knoten *Offene Nachfass-Termine lesen* Credential **Airtable Jobsuche** wählen.\n2. Im Knoten *Telegram senden* Credential **Telegram Jobsuche** wählen (derselbe Bot wie bei der Fehlerbenachrichtigung, Chat ID eingetragen).\n3. Speichern und **Active** einschalten. Manuell testen: Knoten *Start*.\n\n**Ablauf:** Täglich um 8:17 (Europe/Berlin) liest der Workflow die Tabelle *Stellen und Bewerbungen*. Für jede Stelle mit *Nachfassen am* <= heute und Status Beworben, Interview oder Antwort erhalten kommt EINE Telegram-Nachricht (alle fälligen Stellen in einer Nachricht). Es wird nichts an Arbeitgeber gesendet und nichts in Airtable geändert.\nNach dem Nachfassen in Airtable *Nachfassen am* leeren oder ein neues Datum setzen, sonst kommt die Erinnerung am nächsten Tag wieder.\n**Kein Gemini-Aufruf** (0 Tokens)."
+        "height": 460,
+        "content": "## Nachfassen-Erinnerung (Telegram) v1.3 (Telegram HTML-Modus, Sonderzeichen escaped)\n**Einrichten:**\n1. Im Knoten *Offene Nachfass-Termine lesen* Credential **Airtable Jobsuche** wählen.\n2. Im Knoten *Telegram senden* Credential **Telegram Jobsuche** wählen (derselbe Bot wie bei der Fehlerbenachrichtigung, Chat ID eingetragen).\n3. Speichern und **Active** einschalten. Manuell testen: Knoten *Start*.\n\n**Ablauf:** Täglich um 8:17 (Europe/Berlin) liest der Workflow die Tabelle *Stellen und Bewerbungen*. Für jede Stelle mit *Nachfassen am* <= heute und Status Beworben, Interview oder Antwort erhalten kommt EINE Telegram-Nachricht (alle fälligen Stellen in einer Nachricht). Es wird nichts an Arbeitgeber gesendet und nichts in Airtable geändert.\nNach dem Nachfassen in Airtable *Nachfassen am* leeren oder ein neues Datum setzen, sonst kommt die Erinnerung am nächsten Tag wieder.\n**Kein Gemini-Aufruf** (0 Tokens).\n**v1.2 (12.11.2026):** Pings an Healthchecks.io (Start, Erfolg). Kommt bis 8:47 kein Erfolg, meldet Healthchecks per Telegram und Mail. Code-Knoten wiederholen bis zu 5×.\n**v1.3 (12.11.2026):** Jeder Knoten hat eine kurze Beschreibung in *Settings > Notes*. Logik wie v1.2."
       }
     },
     {
@@ -25,7 +25,8 @@
         0,
         100
       ],
-      "parameters": {}
+      "parameters": {},
+      "notes": "Startet den Lauf manuell zum Testen."
     },
     {
       "id": "nf-zeitplan",
@@ -47,7 +48,8 @@
             }
           ]
         }
-      }
+      },
+      "notes": "Startet den Lauf jeden Tag um 8:17 Uhr (Europe/Berlin)."
     },
     {
       "id": "nf-airtable",
@@ -55,7 +57,7 @@
       "type": "n8n-nodes-base.airtable",
       "typeVersion": 2.1,
       "position": [
-        260,
+        480,
         200
       ],
       "alwaysOutputData": true,
@@ -79,7 +81,11 @@
         "airtableTokenApi": {
           "name": "Airtable Jobsuche"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notes": "Liest aus Airtable die Stellen, bei denen das Datum in Nachfassen am heute oder früher ist."
     },
     {
       "id": "nf-code",
@@ -87,12 +93,16 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        520,
+        720,
         200
       ],
       "parameters": {
-        "jsCode": "// Telegram-Nachricht aus den fälligen Stellen bauen (Klartext, ohne Markdown).\nconst items = $input.all().filter(it => it.json && (it.json.fields || it.json.id));\nconst today = $now.toFormat('dd.MM.yyyy');\nconst rows = [];\nfor (const it of items) {\n  const f = it.json.fields || it.json;\n  const title = f['Stellentitel'] || '(ohne Titel)';\n  const status = f['Status'] || '?';\n  const due = f['Nachfassen am'] ? $now.constructor.fromISO(f['Nachfassen am']).toFormat('dd.MM.yyyy') : '?';\n  const applied = f['Beworben am'] ? ', beworben am ' + $now.constructor.fromISO(f['Beworben am']).toFormat('dd.MM.yyyy') : '';\n  const link = f['Link zur Stelle'] ? '\\n   ' + f['Link zur Stelle'] : '';\n  rows.push(`• ${title}\\n   Status: ${status}${applied}, nachfassen seit: ${due}${link}`);\n}\nif (!rows.length) return [];   // nichts fällig: keine Nachricht\nconst text = [`📌 Nachfassen heute (${today}): ${rows.length} Stelle(n)`, '', ...rows, '', 'Nach dem Nachfassen in Airtable das Datum leeren oder neu setzen.'].join('\\n');\nreturn [{ json: { text, count: rows.length } }];\n"
-      }
+        "jsCode": "// Telegram-Nachricht aus den fälligen Stellen bauen (Klartext, ohne Markdown).\nconst items = $input.all().filter(it => it.json && (it.json.fields || it.json.id));\nconst today = $now.toFormat('dd.MM.yyyy');\nconst rows = [];\nfor (const it of items) {\n  const f = it.json.fields || it.json;\n  const title = f['Stellentitel'] || '(ohne Titel)';\n  const status = f['Status'] || '?';\n  const due = f['Nachfassen am'] ? $now.constructor.fromISO(f['Nachfassen am']).toFormat('dd.MM.yyyy') : '?';\n  const applied = f['Beworben am'] ? ', beworben am ' + $now.constructor.fromISO(f['Beworben am']).toFormat('dd.MM.yyyy') : '';\n  const link = f['Link zur Stelle'] ? '\\n   ' + f['Link zur Stelle'] : '';\n  rows.push(`• ${title}\\n   Status: ${status}${applied}, nachfassen seit: ${due}${link}`);\n}\nif (!rows.length) return [{ json: { count: 0 } }];   // nichts fällig: keine Nachricht (v1.2: Lauf gilt trotzdem als erfolgreich)\nconst text = [`📌 Nachfassen heute (${today}): ${rows.length} Stelle(n)`, '', ...rows, '', 'Nach dem Nachfassen in Airtable das Datum leeren oder neu setzen.'].join('\\n');\nreturn [{ json: { text, count: rows.length } }];\n"
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Baut aus den fälligen Stellen eine Telegram-Nachricht oder meldet, dass nichts fällig ist."
     },
     {
       "id": "nf-telegram",
@@ -100,8 +110,8 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        780,
-        200
+        1200,
+        100
       ],
       "parameters": {
         "chatId": "YOUR_TELEGRAM_CHAT_ID",
@@ -115,7 +125,100 @@
         "telegramApi": {
           "name": "Telegram Jobsuche"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notes": "Schickt die Nachfass-Erinnerung per Telegram."
+    },
+    {
+      "parameters": {
+        "url": "https://hc-ping.com/YOUR_HEALTHCHECKS_UUID/start",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "e2c90987-6804-4a73-b60b-3d3d3cbd233e",
+      "name": "HC: Start",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        200
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Meldet Healthchecks.io, dass der Lauf begonnen hat."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "30a186c9-0c18-4a89-b7d1-221c6dd65967",
+              "leftValue": "={{ $json.count > 0 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "4f121c0c-a440-4009-83ba-c798c7dacaed",
+      "name": "Etwas fällig?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        200
+      ],
+      "notes": "Ist mindestens eine Stelle fällig, wird die Nachricht gesendet, sonst geht es direkt zum Erfolgs-Ping."
+    },
+    {
+      "parameters": {
+        "url": "https://hc-ping.com/YOUR_HEALTHCHECKS_UUID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "cda7e926-1600-417b-926a-df1a66bbaa02",
+      "name": "HC: Erfolg",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1440,
+        200
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Meldet Healthchecks.io, dass der Lauf erfolgreich beendet wurde."
     }
   ],
   "connections": {
@@ -123,7 +226,7 @@
       "main": [
         [
           {
-            "node": "Offene Nachfass-Termine lesen",
+            "node": "HC: Start",
             "type": "main",
             "index": 0
           }
@@ -131,6 +234,17 @@
       ]
     },
     "Zeitplan (täglich 8:17)": {
+      "main": [
+        [
+          {
+            "node": "HC: Start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HC: Start": {
       "main": [
         [
           {
@@ -156,7 +270,36 @@
       "main": [
         [
           {
+            "node": "Etwas fällig?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Etwas fällig?": {
+      "main": [
+        [
+          {
             "node": "Telegram senden",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HC: Erfolg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram senden": {
+      "main": [
+        [
+          {
+            "node": "HC: Erfolg",
             "type": "main",
             "index": 0
           }

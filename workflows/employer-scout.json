@@ -1,5 +1,5 @@
 {
-  "name": "Employer-Scout v1.3.5",
+  "name": "Employer-Scout v1.3.7",
   "nodes": [
     {
       "id": "es-note",
@@ -12,8 +12,8 @@
       ],
       "parameters": {
         "width": 900,
-        "height": 420,
-        "content": "## Employer-Scout v1.3.5\n**Vor dem ersten Lauf:**\n1. In den Knoten *Wunschliste lesen* und *In Airtable speichern* Credential **Airtable Jobsuche** wählen.\n2. In den Knoten *Gemini* und *Gemini Ersatz* Credential **Gemini – Jobsuche** wählen.\n3. Speichern und oben rechts **Active** einschalten (bzw. **Publish**).\n\n**Ein Lauf = 1 Gemini-Aufruf (2, wenn das Hauptmodell ausfällt).** Schreibt nur in die Arbeitgeber-Wunschliste. Ergebnis: Knoten *Zusammenfassung*.\nFirmen, die V1 (Website erreichbar) oder V3 (Name auf der Website) nicht bestehen, werden nie gespeichert.\n**v1.1:** Websites mit Bot-Schutz (403/429/Timeout) gelten als vorhanden, wenn die Domain zum Firmennamen passt (Hinweis in Notizen). Domains, die nicht existieren, werden abgelehnt.\n**v1.2:** Entfernung wird von zu Hause gemessen (Straßenebene). Adressen von Gemini sind oft ungenau: vor einer Bewerbung prüfen.\n**v1.3:** Adresse kommt aus dem Impressum der Firma (ohne KI). Gemini-Adresse nur als Ersatz, dann mit Hinweis \"nicht verifiziert\".\n**v1.3.3:** Läuft automatisch jeden Sonntag um 5:47 (Europe/Berlin), Stichwort wechselt wöchentlich (KEYWORD_INDEX = 0). Manuell testen: Knoten *Start*.\n**v1.3.4:** Fällt das Hauptmodell aus (z. B. 503 \"high demand\", wie am 01.11.), wird nach 3 Versuchen (15 s Pause) automatisch das Ersatzmodell aus *Parameter* (FALLBACK_MODEL) verwendet.\n**v1.3.5:** Stichwörter in vier Clustern (Automatisierung, Projektassistenz, Controlling, Operations), 17 Einträge im Wochenwechsel. Cluster steht in den Notizen (\"Fokus (Cluster): ...\"). Negative Stichwörter (Empfang, Kasse, Payroll, ...) gehen als Hinweis in den Prompt. Modelle: Haupt gemini-3.1-flash-lite, Ersatz gemini-3.8-flash."
+        "height": 460,
+        "content": "## Employer-Scout v1.3.7\n**Vor dem ersten Lauf:**\n1. In den Knoten *Wunschliste lesen* und *In Airtable speichern* Credential **Airtable Jobsuche** wählen.\n2. In den Knoten *Gemini* und *Gemini Ersatz* Credential **Gemini – Jobsuche** wählen.\n3. Speichern und oben rechts **Active** einschalten (bzw. **Publish**).\n\n**Ein Lauf = 1 Gemini-Aufruf (2, wenn das Hauptmodell ausfällt).** Schreibt nur in die Arbeitgeber-Wunschliste. Ergebnis: Knoten *Zusammenfassung*.\nFirmen, die V1 (Website erreichbar) oder V3 (Name auf der Website) nicht bestehen, werden nie gespeichert.\n**v1.1:** Websites mit Bot-Schutz (403/429/Timeout) gelten als vorhanden, wenn die Domain zum Firmennamen passt (Hinweis in Notizen). Domains, die nicht existieren, werden abgelehnt.\n**v1.2:** Entfernung wird von zu Hause gemessen (Straßenebene). Adressen von Gemini sind oft ungenau: vor einer Bewerbung prüfen.\n**v1.3:** Adresse kommt aus dem Impressum der Firma (ohne KI). Gemini-Adresse nur als Ersatz, dann mit Hinweis \"nicht verifiziert\".\n**v1.3.3:** Läuft automatisch jeden Sonntag um 5:47 (Europe/Berlin), Stichwort wechselt wöchentlich (KEYWORD_INDEX = 0). Manuell testen: Knoten *Start*.\n**v1.3.4:** Fällt das Hauptmodell aus (z. B. 503 \"high demand\", wie am 01.11.), wird nach 3 Versuchen (15 s Pause) automatisch das Ersatzmodell aus *Parameter* (FALLBACK_MODEL) verwendet.\n**v1.3.5:** Stichwörter in vier Clustern (Automatisierung, Projektassistenz, Controlling, Operations), 17 Einträge im Wochenwechsel. Cluster steht in den Notizen (\"Fokus (Cluster): ...\"). Negative Stichwörter (Empfang, Kasse, Payroll, ...) gehen als Hinweis in den Prompt. Modelle: Haupt gemini-3.1-flash-lite, Ersatz gemini-3.8-flash.\n**v1.3.6 (12.11.2026):** Pings an Healthchecks.io (Start, Erfolg). Kommt sonntags bis 6:47 kein Erfolg, meldet Healthchecks per Telegram und Mail. Code-Knoten wiederholen bis zu 5× (Task-Runner-Ausfall 12.11.).\n**v1.3.7 (12.11.2026):** Jeder Knoten hat eine kurze Beschreibung in *Settings > Notes*. Logik wie v1.3.6."
       }
     },
     {
@@ -25,7 +25,8 @@
         0,
         300
       ],
-      "parameters": {}
+      "parameters": {},
+      "notes": "Startet den Lauf manuell zum Testen."
     },
     {
       "id": "es-parameter",
@@ -38,7 +39,11 @@
       ],
       "parameters": {
         "jsCode": "// ===== Employer-Scout: Parameter (nur hier ändern) =====\nconst MODEL = 'gemini-3.1-flash-lite';   // Modell an EINER Stelle; Ersatz: FALLBACK_MODEL\nconst FALLBACK_MODEL = 'gemini-3.8-flash'; // Ersatz, wenn das Hauptmodell nach 3 Versuchen ausfällt (z. B. 503 high demand)\nconst RESULTS = 10;                 // erster Test: 10, danach 20\nconst KEYWORD_INDEX = 0;            // 0 = automatisch nach Kalenderwoche (für den Zeitplan), 1-17 = festes Stichwort für Tests (Nummer siehe KEYWORDS)\nconst TEMPERATURE = 0;              // falls Gemini sich wiederholt oder abbricht: 1 versuchen\nconst GROUNDING = false;            // Google-Suche in Gemini: erst testen, ob der Free Tier das erlaubt\nconst MAX_WISHLIST = 300;           // Budget für die Wunschliste (Airtable Free: 1.000 Datensätze pro Base)\nconst MAX_KM = 7;                   // Hybrid/Vor Ort: max. Luftlinie von zu Hause\nconst HOME = { lat: 0, lon: 0 };  // REFERENCE_POINT: Koordinaten deines Bezugspunkts eintragen\nconst SIZE_MIN = 20, SIZE_MAX = 50000;\n\n// c = Cluster, k = Stichwort (Reihenfolge = Wochenwechsel; Cluster abwechselnd)\nconst KEYWORDS = [\n  { c: 'Automatisierung',  k: 'Prozessautomatisierung / Workflow-Automatisierung (n8n, Make, Zapier)' },\n  { c: 'Projektassistenz', k: 'Projektassistenz / Projektassistent/in / Assistenz Projektmanagement / Projektorganisation' },\n  { c: 'Controlling',      k: 'Projektcontrolling / Projektsteuerung / Kaufmännische Projektsteuerung (Projektkaufmann)' },\n  { c: 'Operations',       k: 'Operations Specialist / Operations Manager / Business Operations' },\n  { c: 'Automatisierung',  k: 'KI-Agenten / KI-Integration in Geschäftsprozesse' },\n  { c: 'Projektassistenz', k: 'Projektkoordination / Project Coordinator / PMO (Projektmanagement Office)' },\n  { c: 'Controlling',      k: 'Controlling / Junior Controller / Soll-Ist-Vergleich / Budgetplanung' },\n  { c: 'Operations',       k: 'Prozessmanagement / Prozessmanager / Business Process Management / Continuous Improvement' },\n  { c: 'Automatisierung',  k: 'Geschäftsprozessmanagement / BPMN / Prozessoptimierung' },\n  { c: 'Projektassistenz', k: 'Unit-Assistenz / Rechnungsbearbeitung / Zeiterfassung' },\n  { c: 'Controlling',      k: 'Kostensteuerung / Kostenkontrolle / Terminsteuerung / Projektabrechnung / Leistungsnachweise' },\n  { c: 'Operations',       k: 'Business Analyse' },\n  { c: 'Automatisierung',  k: 'Low-Code / No-Code / Citizen Development' },\n  { c: 'Controlling',      k: 'Reporting / Berichtswesen / Vertragsmanagement / Excel (Pivot)' },\n  { c: 'Automatisierung',  k: 'Wissensmanagement / interne KI-Tools' },\n  { c: 'Automatisierung',  k: 'Datenschutz / DSGVO / AI Act / KI-Governance' },\n  { c: 'Automatisierung',  k: 'Digitalisierung von Geschäftsprozessen' },\n];\n\n// Negative Stichwörter: Firmen, deren Stellen in diesem Feld hauptsächlich darum gehen, sollen nicht vorgeschlagen werden\nconst NEGATIVE = ['Empfang', 'Rezeption', 'Kasse', 'Fraud', 'KYC', 'Payroll', 'Store', 'Büromanagement', 'Assistenz der Geschäftsführung', 'Sekretariat'];\n\nlet idx = KEYWORD_INDEX;\nif (!idx) {\n  const d = new Date();\n  const start = new Date(d.getFullYear(), 0, 1);\n  const week = Math.ceil(((d - start) / 86400000 + start.getDay() + 1) / 7);\n  idx = (week % KEYWORDS.length) + 1;\n}\nif (idx < 1 || idx > KEYWORDS.length) throw new Error('KEYWORD_INDEX muss 0 bis ' + KEYWORDS.length + ' sein.');\n\nreturn [{ json: {\n  model: MODEL, fallback_model: FALLBACK_MODEL, results: RESULTS, keyword_index: idx, keyword: KEYWORDS[idx - 1].k, keyword_cluster: KEYWORDS[idx - 1].c, negative: NEGATIVE.join(', '),\n  temperature: TEMPERATURE, grounding: GROUNDING, max_wishlist: MAX_WISHLIST,\n  max_km: MAX_KM, home: HOME, size_min: SIZE_MIN, size_max: SIZE_MAX,\n} }];\n"
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Enthält alle Einstellungen des Laufs (Stichwörter, Modelle, Entfernung) und ist der einzige Ort für Änderungen."
     },
     {
       "id": "es-wunschliste-lesen",
@@ -69,7 +74,11 @@
         "airtableTokenApi": {
           "name": "Airtable Jobsuche"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notes": "Liest die vorhandenen Arbeitgeber der Wunschliste aus Airtable, damit keine Firma doppelt vorgeschlagen wird."
     },
     {
       "id": "es-prompt-bauen",
@@ -82,7 +91,11 @@
       ],
       "parameters": {
         "jsCode": "// Baut den EINEN Gemini-Aufruf. Keine persönlichen Daten im Prompt.\nconst p = $('Parameter').first().json;\nconst NAME = 'Name des Arbeitgebers';\n\nconst existing = [];\nfor (const it of $input.all()) {\n  const j = it.json || {};\n  const n = (j.fields && j.fields[NAME]) || j[NAME];\n  if (n) existing.push(String(n).trim());\n}\n\nconst free = p.max_wishlist - existing.length;\nif (free <= 0) throw new Error(`Wunschliste hat ${existing.length} Einträge (Grenze ${p.max_wishlist}). Erst aufräumen, dann neu starten.`);\nconst n = Math.min(p.results, free);\n\nconst prompt = `You are a research assistant building a list of potential employers in Berlin, Germany.\n\nTask: list up to ${n} real companies that\n- have an office in Berlin,\n- have between ${p.size_min} and ${p.size_max} employees,\n- are likely to employ people in this field: \"${p.keyword}\",\n- may be in any industry.\nPrefer companies whose Berlin office is within about ${p.max_km} km of Alexanderplatz, or that work fully remote.\n\nDo NOT include these companies (already on the list): ${existing.length ? existing.join('; ') : 'none'}\n\nStrict rules:\n1. Only list companies you are certain exist and have an office in Berlin. If unsure, leave the company out. Fewer results are better than invented ones.\n2. website_domain: the company's real main domain, without \"https://\" and without a path (example: \"example.com\"). Only if you know it. Never guess. If unknown, null.\n3. careers_url: only a full URL you know exists. Never construct or guess a URL (for example by adding \"/karriere\" or \"/jobs\" to the domain). If unknown, null.\n4. berlin_office_address: street, house number, postcode, \"Berlin\". Only if you know it. Never invent an address. If unknown, null.\n5. work_mode_guess: \"Remote\", \"Hybrid\", \"Vor Ort\", or null if unknown.\n6. industry: short German label (for example \"Software\", \"E-Commerce\", \"Energie\").\n7. why_it_fits: one short German sentence on why the company fits the field \"${p.keyword}\". No invented facts.\n8. Leave out companies whose openings in this field are mainly about: ${p.negative}.\\n9. Return only JSON of the form {\"employers\": [...]}, no other text.`;\n\nconst schema = {\n  type: 'OBJECT',\n  properties: {\n    employers: {\n      type: 'ARRAY',\n      items: {\n        type: 'OBJECT',\n        properties: {\n          name: { type: 'STRING' },\n          website_domain: { type: 'STRING', nullable: true },\n          industry: { type: 'STRING', nullable: true },\n          berlin_office_address: { type: 'STRING', nullable: true },\n          work_mode_guess: { type: 'STRING', nullable: true, enum: ['Remote', 'Hybrid', 'Vor Ort'] },\n          careers_url: { type: 'STRING', nullable: true },\n          why_it_fits: { type: 'STRING', nullable: true },\n        },\n        required: ['name', 'website_domain', 'industry', 'berlin_office_address', 'work_mode_guess', 'careers_url', 'why_it_fits'],\n      },\n    },\n  },\n  required: ['employers'],\n};\n\nconst body = {\n  contents: [{ role: 'user', parts: [{ text: prompt }] }],\n  generationConfig: { temperature: p.temperature, maxOutputTokens: 16384 },\n};\nif (p.grounding) {\n  body.tools = [{ google_search: {} }];          // mit Grounding kein Schema-Modus\n} else {\n  body.generationConfig.responseMimeType = 'application/json';\n  body.generationConfig.responseSchema = schema;\n}\n\nreturn [{ json: { body, existing, requested: n } }];\n"
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Baut die Anfrage an Gemini mit dem Stichwort der Woche und den bekannten Firmen und stoppt, wenn die Wunschliste voll ist."
     },
     {
       "id": "es-gemini",
@@ -113,7 +126,8 @@
           "name": "Gemini – Jobsuche"
         }
       },
-      "onError": "continueErrorOutput"
+      "onError": "continueErrorOutput",
+      "notes": "Lässt das Hauptmodell passende Arbeitgeber in Berlin vorschlagen, bei Ausfall geht es zum Ersatzmodell."
     },
     {
       "id": "es-antwort-parsen",
@@ -126,7 +140,11 @@
       ],
       "parameters": {
         "jsCode": "// Gemini-Antwort lesen, säubern, Duplikate entfernen.\nconst r = $input.first().json;\nconst existing = $('Prompt bauen').first().json.existing || [];\n\nif (r.error) throw new Error('Gemini-Fehler: ' + JSON.stringify(r.error).slice(0, 500));\nconst cand = (r.candidates || [])[0];\nif (!cand) throw new Error('Gemini hat keine Antwort geliefert: ' + JSON.stringify(r).slice(0, 500));\nconst text = ((cand.content || {}).parts || []).map(x => x.text || '').join('').trim();\n\nlet data;\ntry {\n  data = JSON.parse(text.replace(/^```(?:json)?\\s*/i, '').replace(/```\\s*$/, ''));\n} catch (e) {\n  throw new Error(`Antwort ist kein gültiges JSON (finishReason: ${cand.finishReason}). Anfang: ${text.slice(0, 300)}`);\n}\nconst list = Array.isArray(data) ? data : (data.employers || []);\n\nconst LEGAL = /\\b(gmbh|ag|se|kgaa|kg|ug|ohg|gbr|e\\.?\\s?v|b\\.?\\s?v|n\\.?\\s?v|s\\.?\\s?a\\.?\\s?r\\.?\\s?l|s\\.?\\s?r\\.?\\s?l|s\\.?\\s?p\\.?\\s?a|s\\.?\\s?a\\.?\\s?s|s\\.?\\s?a|mbh|co|inc|ltd|limited|llc|plc|corp|corporation|group|holding|oy|aps|haftungsbeschränkt)\\b\\.?/g;\nconst norm = s => String(s || '').toLowerCase()\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')\n  .replace(/&/g, ' ').replace(LEGAL, ' ').replace(/[^a-z0-9]+/g, '');\nconst cleanDomain = d => {\n  if (!d) return null;\n  const s = String(d).trim().toLowerCase().replace(/^https?:\\/\\//, '').split(/[\\/?#]/)[0];\n  return /^[a-z0-9.-]+\\.[a-z]{2,}$/.test(s) ? s : null;\n};\nconst cleanUrl = u => (u && /^https?:\\/\\/[^\\s]+\\.[^\\s]+/i.test(String(u).trim())) ? String(u).trim() : null;\nconst clean = v => (v === null || v === undefined || String(v).trim() === '' || String(v).toLowerCase() === 'null') ? null : String(v).trim();\n\nconst seen = new Set(existing.map(norm));\nconst duplicates = [];\nconst out = [];\nfor (const e of list) {\n  const name = clean(e && e.name);\n  if (!name) continue;\n  const key = norm(name);\n  if (!key || seen.has(key)) { duplicates.push(name); continue; }\n  seen.add(key);\n  const mode = ['Remote', 'Hybrid', 'Vor Ort'].includes(e.work_mode_guess) ? e.work_mode_guess : null;\n  out.push({ json: {\n    name,\n    website_domain: cleanDomain(e.website_domain),\n    industry: clean(e.industry),\n    berlin_office_address: clean(e.berlin_office_address),\n    work_mode_guess: mode,\n    careers_url: cleanUrl(e.careers_url),\n    why_it_fits: clean(e.why_it_fits),\n  } });\n}\n\nconst meta = { found: list.length, duplicates, finishReason: cand.finishReason || null, usage: r.usageMetadata || null, model: r.modelVersion || null };\nif (!out.length) throw new Error(`Keine neuen Firmen (gefunden: ${list.length}, Duplikate: ${duplicates.length}). Anderes Stichwort in \"Parameter\" wählen.`);\nout[0].json._meta = meta;\nreturn out;\n"
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Liest die Firmenvorschläge aus der Gemini-Antwort und entfernt Dubletten."
     },
     {
       "id": "es-website-pr-fen",
@@ -159,7 +177,8 @@
           },
           "timeout": 15000
         }
-      }
+      },
+      "notes": "Prüft, ob die genannte Firmenwebsite erreichbar ist."
     },
     {
       "id": "es-karriereseite-pr-fen",
@@ -192,7 +211,8 @@
           },
           "timeout": 15000
         }
-      }
+      },
+      "notes": "Prüft, ob die genannte Karriereseite erreichbar ist."
     },
     {
       "id": "es-pr-fen",
@@ -205,7 +225,11 @@
       ],
       "parameters": {
         "jsCode": "// Anti-Halluzinations-Prüfung V1-V3 + Adresse aus Impressum (deterministisch, ohne KI). v1.3\n// v1.3: Adresse wird aus Impressum/Startseite gelesen; Gemini-Adresse nur als Ersatz.\n// v1.2: ausländische Rechtsformen (B.V., S.A., ...); Karriereseite mit Bot-Schutz akzeptiert; Grund im Hinweis.\n// Änderungen v1.1:\n// - HTML wird aus \"data\" ODER \"body\" gelesen (n8n legt Text-Antworten in \"data\" ab).\n// - Bot-Schutz (401/403/406/429/503/999, Timeout, Verbindungsabbruch) zählt als \"Server existiert\".\n//   Dann gilt V3 als bestanden, wenn der Domainname zum Firmennamen passt (Hinweis im Datensatz).\n// - DNS-Fehler (Domain existiert nicht) = abgelehnt.\nconst orig = $('Antwort parsen').all();\nconst web = $('Website prüfen').all();\nconst car = $('Karriereseite prüfen').all();\n\nconst ATS = ['personio', 'join.com', 'greenhouse', 'lever.co', 'smartrecruiters', 'workday', 'softgarden',\n             'recruitee', 'stepstone', 'ashbyhq', 'teamtailor', 'workable'];\nconst BLOCKED = [401, 403, 406, 429, 503, 999];\nconst DNS_FAIL = /ENOTFOUND|EAI_AGAIN|getaddrinfo|NXDOMAIN|not resolve|invalid\\.invalid|Invalid URL|ERR_INVALID_URL/i;\nconst GENERIC = /\\b(ventures|venture|technologies|technology|tech|labs|lab|solutions|services|digital|software|systems|consulting|deutschland|germany|berlin|international|europe)\\b/g;\nconst LEGAL = /\\b(gmbh|ag|se|kgaa|kg|ug|ohg|gbr|e\\.?\\s?v|b\\.?\\s?v|n\\.?\\s?v|s\\.?\\s?a\\.?\\s?r\\.?\\s?l|s\\.?\\s?r\\.?\\s?l|s\\.?\\s?p\\.?\\s?a|s\\.?\\s?a\\.?\\s?s|s\\.?\\s?a|mbh|co|inc|ltd|limited|llc|plc|corp|corporation|group|holding|oy|aps)\\b\\.?/g;\n\nconst errText = it => {\n  if (!it) return 'keine Antwort';\n  const e = (it.json && it.json.error) || it.error;\n  if (!e) return '';\n  return typeof e === 'string' ? e : JSON.stringify(e);\n};\nconst status = it => (it && it.json && !errText(it) && it.json.statusCode) ? it.json.statusCode : null;\nconst html = it => {\n  const j = (it && it.json) || {};\n  const v = typeof j.data === 'string' ? j.data : (typeof j.body === 'string' ? j.body : '');\n  return v;\n};\n// Ergebnis einer Abfrage: ok (200) | blocked (Server da, aber gesperrt) | dns (Domain gibt es nicht) | fail\nconst classify = it => {\n  const s = status(it);\n  if (s === 200) return { kind: 'ok', code: 200 };\n  if (s && BLOCKED.includes(s)) return { kind: 'blocked', code: s };\n  if (s) return { kind: 'fail', code: s };\n  const t = errText(it);\n  if (DNS_FAIL.test(t)) return { kind: 'dns', code: 'Domain existiert nicht' };\n  const m = t.match(/\\bE[A-Z]{4,}\\b/) || t.match(/timeout/i);\n  return { kind: 'blocked', code: 'keine Antwort' + (m ? ' (' + m[0] + ')' : '') };\n};\nconst decode = s => s.toLowerCase()\n  .replace(/&amp;/g, '&').replace(/&auml;/g, 'ä').replace(/&ouml;/g, 'ö').replace(/&uuml;/g, 'ü').replace(/&szlig;/g, 'ß')\n  .replace(/&#x?[0-9a-f]+;/g, ' ');\nconst compact = s => s.replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst hostOf = u => { const m = String(u || '').match(/^https?:\\/\\/([^\\/?#:]+)/i); return m ? m[1].toLowerCase().replace(/^www\\./, '') : ''; };\n// Domain passt zum Namen: zalando.de <-> Zalando, deliveryhero.com <-> Delivery Hero, project-a.vc <-> Project A Ventures\nconst domainMatches = (domain, core) => {\n  const parts = (domain || '').replace(/^www\\./, '').split('.');\n  if (parts.length < 2) return false;\n  const label = compact(parts.slice(0, -1).join(''));\n  const c = compact(core);\n  if (label.length < 4 || c.length < 4) return false;\n  return label.includes(c) || c.includes(label);\n};\n\n// --- Adresse aus Impressum ---\nconst toText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|span|address|td|h\\d)>/gi, ', ')\n  .replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&middot;|&#183;|&bull;/gi, '·').replace(/&amp;/gi, '&').replace(/&szlig;/gi, 'ß')\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü')\n  .replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n))\n  .replace(/\\\\u00df/g, 'ß').replace(/\\\\u00e4/g, 'ä').replace(/\\\\u00f6/g, 'ö').replace(/\\\\u00fc/g, 'ü')\n  .replace(/[\\s ]+/g, ' ');\nconst W = \"[A-ZÄÖÜ][A-Za-zäöüßÄÖÜé\\\\-]*\";\nconst SUF = \"(?:[Ss]tra(?:ß|ss)e|[Ss]tr\\\\.|[Pp]latz|[Aa]llee|[Dd]amm|[Uu]fer|[Ww]eg|[Rr]ing|[Mm]arkt|[Cc]haussee|[Gg]asse|[Pp]romenade|[Bb]rücke|[Ss]teig|[Gg]raben|[Kk]ai|[Zz]eile|[Pp]ark|[Hh]of|[Tt]or|[Bb]ogen)\";\nconst NOTWORD = \"(?!(?:GmbH|AG|SE|KG|Co|mbH|Inc|Ltd|Anschrift|Adresse|Address|Sitz|Berlin|Germany|Deutschland|Postanschrift|Hausanschrift|Office|Registered)\\\\b)\";\nconst ADDR = new RegExp(\n  \"(?<![\\\\wäöüßÄÖÜ\\\\-])(\" + \"(?:\" + NOTWORD + W + \"\\\\s)?\" + \"(?:\" + W + SUF + \"|\" + SUF + \")\" + \")\" +\n  \"\\\\.?\\\\s*(\\\\d{1,4}\\\\s?[a-zA-Z]?(?:\\\\s?[-–\\\\/]\\\\s?\\\\d{1,4}[a-zA-Z]?)?)\" +\n  \"\\\\s*[,|·•]?\\\\s*(?:D-|DE-)?(1[0-4]\\\\d{3}),?\\\\s+Berlin\", \"g\");\nconst findAddress = html => {\n  const t = toText(html);\n  const out = [];\n  for (const m of t.matchAll(ADDR)) out.push(`${m[1].trim()} ${m[2].replace(/\\s+/g, '')}, ${m[3]} Berlin`);\n  return out;\n};\n\n\nconst impUrls = (() => { try { return $('Impressum-URLs').all(); } catch (e) { return []; } })();\nconst impRes = (() => { try { return $('Impressum laden').all(); } catch (e) { return []; } })();\nconst imp = impUrls.map((u, k) => ({ idx: u.json.idx, ok: status(impRes[k]) === 200, html: html(impRes[k]) }));\n\nconst accepted = [];\nconst rejected = [];\nfor (let i = 0; i < orig.length; i++) {\n  const e = orig[i].json;\n  const reasons = [];\n  const warnings = [];\n  const core = e.name.toLowerCase().replace(LEGAL, ' ').replace(/\\s+/g, ' ').trim() || e.name.toLowerCase();\n  // Kurzform ohne Zusätze wie \"Ventures\", \"Technologies\" (Project A Ventures -> project a)\n  const shortCore = core.replace(GENERIC, ' ').replace(/\\s+/g, ' ').trim();\n  // \"Babbel (Lesson Nine GmbH)\": Teil vor und in der Klammer separat prüfen\n  const outer = core.replace(/\\(.*?\\)/g, ' ').replace(/\\s+/g, ' ').trim();\n  const inner = ((core.match(/\\((.*?)\\)/) || [])[1] || '').replace(LEGAL, ' ').replace(/\\s+/g, ' ').trim();\n  const names = [core, shortCore, outer, inner].filter((n, k, a) => n && compact(n).length >= 4 && a.indexOf(n) === k);\n\n  // V1: Website existiert\n  const w = e.website_domain ? classify(web[i]) : { kind: 'dns', code: 'keine Website angegeben' };\n  const v1 = w.kind === 'ok' || w.kind === 'blocked';\n  if (!e.website_domain) reasons.push('keine Website angegeben');\n  else if (!v1) reasons.push(`Website ${e.website_domain}: ${w.code}`);\n\n  // V2: Karriereseite (200 + eigene Domain oder bekanntes ATS)\n  const c = e.careers_url ? classify(car[i]) : { kind: 'fail', code: null };\n  const cHost = hostOf(e.careers_url || '');\n  const root = (e.website_domain || '').replace(/^www\\./, '');\n  const hostOk = !!cHost && ((root && (cHost === root || cHost.endsWith('.' + root))) || ATS.some(a => cHost.includes(a)));\n  const v2 = !!e.careers_url && hostOk && (c.kind === 'ok' || c.kind === 'blocked');\n  if (!e.careers_url) warnings.push('Karriereseite nicht gefunden (keine URL von Gemini)');\n  else if (!hostOk) warnings.push(`Karriereseite nicht gefunden (fremde Domain: ${cHost || 'ungültig'})`);\n  else if (!v2) warnings.push(`Karriereseite nicht gefunden (${c.code})`);\n  else if (c.kind === 'blocked') warnings.push(`Karriereseite blockiert Prüfung (${c.code})`);\n\n  // V3: Firmenname auf Website/Karriereseite; bei Bot-Schutz: Domain passt zum Namen\n  const webHtml = w.kind === 'ok' ? html(web[i]) : '';\n  const pages = [webHtml, (v2 && c.kind === 'ok') ? html(car[i]) : ''].map(decode);\n  const nameOnPage = pages.some(h => h && (h.includes(core) || names.some(n => compact(h).includes(compact(n)))));\n  let v3 = nameOnPage;\n  if (v1 && !v3 && w.kind === 'blocked' && domainMatches(e.website_domain, core)) {\n    v3 = true;\n    warnings.push(`Website blockiert automatische Prüfung (${w.code}), Name nur über Domain geprüft`);\n  }\n  if (v1 && !v3) {\n    reasons.push(w.kind === 'blocked'\n      ? `Website blockiert Prüfung (${w.code}) und Domain passt nicht zum Namen`\n      : `Firmenname nicht auf der Website gefunden (HTML: ${webHtml.length} Zeichen)`);\n  }\n\n  // Adresse: zuerst Impressum-Seiten, dann Startseite\n  let imprint_address = null;\n  for (const h of [...imp.filter(x => x.idx === i && x.ok).map(x => x.html), webHtml]) {\n    const a = h ? findAddress(h) : [];\n    if (a.length) { imprint_address = a[0]; break; }\n  }\n\n  if (v1 && v3) accepted.push({ json: { ...e, _meta: undefined, v2_ok: v2, domain_only: w.kind === 'blocked', imprint_address, warnings } });\n  else rejected.push({ name: e.name, grund: reasons.join('; ') });\n}\n\nif (!accepted.length) return [{ json: { nothing: true, _rejected: rejected, _total: orig.length } }];\nfor (const a of accepted) { a.json._rejected = rejected; a.json._total = orig.length; }\nreturn accepted;\n"
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Verwirft Firmen ohne erreichbare Website oder ohne Namen auf der Website und liest die Adresse aus dem Impressum."
     },
     {
       "id": "es-adresse-geocodieren",
@@ -244,7 +268,8 @@
             }
           }
         }
-      }
+      },
+      "notes": "Wandelt die Büroadresse in Koordinaten um."
     },
     {
       "id": "es-entfernung",
@@ -257,7 +282,11 @@
       ],
       "parameters": {
         "jsCode": "// Entfernung von zu Hause (Luftlinie) + Airtable-Datensätze vorbereiten.\nconst p = $('Parameter').first().json;\nconst items = $('Prüfen').all();\nconst geo = $input.all();\nconst HOME = p.home;\nconst modelUsed = (($('Antwort parsen').first().json._meta || {}).model) || p.model;\nconst today = $now.toFormat('yyyy-MM-dd');\n\nconst rad = x => x * Math.PI / 180;\nconst haversine = (a, b) => {\n  const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon);\n  const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;\n  return 6371 * 2 * Math.asin(Math.sqrt(h));\n};\n\nconst records = [];\nconst tooFar = [];\nconst noAddress = [];\nconst noCareers = [];\nconst domainOnly = [];\nconst fromImprint = [];\nconst geminiWrong = [];\nconst comp = s => String(s || '').toLowerCase().replace(/straße|strasse/g, 'str').replace(/[^a-z0-9äöü]/g, '');\nconst same = (a, b) => { const pa = (a.match(/\\b1[0-4]\\d{3}\\b/) || [])[0], pb = (b.match(/\\b1[0-4]\\d{3}\\b/) || [])[0]; return pa === pb && comp(a).slice(0, 8) === comp(b).slice(0, 8); };\n\nfor (let i = 0; i < items.length; i++) {\n  const e = items[i].json;\n  if (e.nothing) continue;\n\n  const addr = e.imprint_address || e.berlin_office_address;\n  const src = e.imprint_address ? 'Adresse laut Impressum' : 'Adresse von Gemini, nicht verifiziert';\n  let km = null;\n  if (addr) {\n    let arr = null;\n    const g = geo[i] && geo[i].json ? (typeof geo[i].json.data === 'string' ? geo[i].json.data : geo[i].json.body) : null;\n    try { arr = typeof g === 'string' ? JSON.parse(g) : g; } catch (err) { arr = null; }\n    if (Array.isArray(arr) && arr[0] && arr[0].lat) {\n      km = Math.round(haversine(HOME, { lat: +arr[0].lat, lon: +arr[0].lon }) * 10) / 10;\n    }\n  }\n  const warnings = [...(e.warnings || [])];\n  if (km === null) { warnings.push('Adresse nicht geprüft'); noAddress.push(e.name); }\n\n  // Entfernungsregel gilt für alles außer \"Remote\" (auch für unbekannten Arbeitsmodus)\n  if (e.work_mode_guess !== 'Remote' && km !== null && km > p.max_km) {\n    tooFar.push({ name: e.name, km, modus: e.work_mode_guess || 'unbekannt' });\n    continue;\n  }\n\n  if (!e.v2_ok) noCareers.push(e.name);\n  if (e.domain_only) domainOnly.push(e.name);\n  let geminiNote = null;\n  if (e.imprint_address) {\n    fromImprint.push(e.name);\n    if (e.berlin_office_address && !same(e.imprint_address, e.berlin_office_address)) { geminiWrong.push(e.name); geminiNote = `Gemini hatte ${e.berlin_office_address} angegeben (abweichend).`; }\n  } else if (!e.domain_only) warnings.push('keine Berliner Adresse im Impressum gefunden');\n\n  const notes = [\n    `Fokus (${p.keyword_cluster}): ${p.keyword}`,\n    e.why_it_fits || null,\n    km !== null ? `Entfernung von zu Hause: ${String(km).replace('.', ',')} km (Luftlinie, ${src})` : null,\n    geminiNote,\n    e.work_mode_guess ? null : 'Arbeitsmodus unbekannt',\n    warnings.length ? 'Hinweise: ' + [...new Set(warnings)].join(', ') : null,\n    `Employer-Scout ${today}, Modell ${modelUsed}`,\n  ].filter(Boolean).join('\\n');\n\n  const fields = {\n    fldsF7QizI7J65GrS: e.name,                                  // Name des Arbeitgebers\n    fldAalhTRAmssY96o: addr || 'Berlin',                         // Standort (Impressum vor Gemini)\n    fldO6QeTNdkt370U7: e.industry,                              // Branche\n    fldRlJZxADTfcbTTz: e.work_mode_guess,                       // Arbeitsort\n    fldpC1zthl85U3itZ: 'Neu (vom Scout vorgeschlagen)',         // Status\n    fldCnPYVpHbAe9lPI: 'KI-Prompt',                             // Quelle\n    flde03QfdDq2KIXkT: 'Unbekannt',                             // KI-Bezug\n    fldFIaM38DVcUUTRA: today,                                   // Zuletzt geprüft\n    fldv3Q0ZQ9zo5NS1I: notes,                                   // Notizen\n    fldLrD0XwVXbE8uMU: e.v2_ok ? e.careers_url : null,          // Link zur Karriereseite\n  };\n  for (const k of Object.keys(fields)) if (fields[k] === null || fields[k] === undefined) delete fields[k];\n  records.push({ fields });\n}\n\nconst summary = { tooFar, noAddress, noCareers, domainOnly, fromImprint, geminiWrong };\nconst out = [];\nfor (let i = 0; i < records.length; i += 10) out.push({ json: { records: records.slice(i, i + 10), _summary: summary } });\nif (!out.length) out.push({ json: { records: [], _summary: summary } });\nreturn out;\n"
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Berechnet die Luftlinie vom Zuhause zum Büro, sortiert zu weit entfernte Firmen aus und bereitet die Airtable-Datensätze vor."
     },
     {
       "id": "es-etwas-zu-speichern-",
@@ -289,7 +318,8 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "notes": "Gibt es geprüfte neue Firmen, werden sie gespeichert, sonst geht es direkt zur Zusammenfassung."
     },
     {
       "id": "es-in-airtable-speichern",
@@ -323,7 +353,8 @@
         "airtableTokenApi": {
           "name": "Airtable Jobsuche"
         }
-      }
+      },
+      "notes": "Speichert die geprüften neuen Arbeitgeber in der Wunschliste in Airtable."
     },
     {
       "id": "es-zusammenfassung",
@@ -336,7 +367,11 @@
       ],
       "parameters": {
         "jsCode": "// Zusammenfassung des Laufs.\nconst p = $('Parameter').first().json;\nconst meta = $('Antwort parsen').first().json._meta || {};\nconst checked = $('Antwort parsen').all().length;\nconst chk = $('Prüfen').first().json;\nconst rejected = chk._rejected || [];\nconst s = $('Entfernung').first().json._summary || {};\n\nconst added = [];\nconst errors = [];\nlet fb = false;\ntry { fb = $('Gemini Ersatz').isExecuted; } catch (e) { fb = false; }\nlet wrote = false;\ntry { wrote = $('In Airtable speichern').isExecuted; } catch (e) { wrote = false; }\nif (wrote) {\n  for (const it of $('In Airtable speichern').all()) {\n    if (it.json.error) { errors.push(JSON.stringify(it.json.error).slice(0, 300)); continue; }\n    for (const r of it.json.records || []) {\n      const f = r.fields || {};\n      added.push(f['Name des Arbeitgebers'] || f.fldsF7QizI7J65GrS || r.id);\n    }\n  }\n}\n\nconst rate = checked ? Math.round(rejected.length / checked * 100) : 0;\nreturn [{ json: {\n  'Modell': meta.model || p.model,\n  'Ersatzmodell genutzt': fb ? p.fallback_model : null,\n  'Fokus': `${p.keyword_index}: [${p.keyword_cluster}] ${p.keyword}`,\n  'Gemini-Aufrufe': 1,\n  'Gemini-Tokens': meta.usage ? meta.usage.totalTokenCount : null,\n  'Von Gemini gefunden': meta.found,\n  'Duplikate übersprungen': meta.duplicates || [],\n  'Hinzugefügt': added,\n  'Abgelehnt (evtl. erfunden)': rejected,\n  ['Zu weit (> ' + p.max_km + ' km)']: s.tooFar || [],\n  'Karriereseite nicht gefunden': s.noCareers || [],\n  'Nur über Domain geprüft (Bot-Schutz)': s.domainOnly || [],\n  'Adresse aus Impressum': s.fromImprint || [],\n  'Gemini-Adresse falsch': s.geminiWrong || [],\n  'Adresse nicht geprüft': s.noAddress || [],\n  'Speicherfehler': errors,\n  'Ablehnungsquote': rate + ' %',\n  'Warnung': rate > 30 ? 'Mehr als 30 % abgelehnt: Prompt oder Stichwort anpassen.' : null,\n  'Gemini-Abbruchgrund': meta.finishReason,\n} }];\n"
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Fasst den Lauf zusammen (hinzugefügt, abgelehnt, Fehler) als Ergebnis im Knoten."
     },
     {
       "id": "es-impressum-urls",
@@ -349,7 +384,11 @@
       ],
       "parameters": {
         "jsCode": "// Impressum-Seiten pro Firma bestimmen (ohne KI). v1.3\n// 1. Link mit \"impressum\"/\"imprint\" von der Startseite, 2. übliche Pfade.\nconst orig = $('Antwort parsen').all();\nconst web = $('Website prüfen').all();\nconst PATHS = ['/impressum', '/imprint', '/de/impressum', '/legal'];\nconst html = it => {\n  const j = (it && it.json) || {};\n  return typeof j.data === 'string' ? j.data : (typeof j.body === 'string' ? j.body : '');\n};\n\n// n8n-Sandbox kennt kein URL-Objekt: eigene Hilfsfunktion\nconst absUrl = (href, domain) => /^https?:\\/\\//i.test(href) ? href : href.startsWith('//') ? 'https:' + href : 'https://' + domain + (href.startsWith('/') ? '' : '/') + href;\n\nconst out = [];\nfor (let i = 0; i < orig.length; i++) {\n  const d = orig[i].json.website_domain;\n  if (!d) continue;\n  const urls = [];\n  const m = html(web[i]).match(/href=[\"']([^\"'#\\s]*?(?:impressum|imprint)[^\"'#\\s]*)[\"']/i);\n  if (m) urls.push(absUrl(m[1].replace(/&amp;/g, '&'), d));\n  for (const p of PATHS) urls.push('https://' + d + p);\n  for (const u of [...new Set(urls)]) out.push({ json: { idx: i, url: u } });\n}\nif (!out.length) out.push({ json: { idx: -1, url: 'https://invalid.invalid' } });\nreturn out;\n"
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Baut je Firma die Adresse der Impressum-Seite."
     },
     {
       "id": "es-impressum-laden",
@@ -388,7 +427,8 @@
             }
           }
         }
-      }
+      },
+      "notes": "Lädt das Impressum jeder Firma, um die echte Büroadresse zu finden."
     },
     {
       "id": "es-zeitplan",
@@ -413,7 +453,8 @@
             }
           ]
         }
-      }
+      },
+      "notes": "Startet den Lauf jeden Sonntag um 5:47 Uhr (Europe/Berlin)."
     },
     {
       "id": "es-gemini-ersatz",
@@ -443,7 +484,62 @@
         "googlePalmApi": {
           "name": "Gemini – Jobsuche"
         }
-      }
+      },
+      "notes": "Fragt das Ersatzmodell, wenn das Hauptmodell nach mehreren Versuchen nicht antwortet."
+    },
+    {
+      "parameters": {
+        "url": "https://hc-ping.com/YOUR_HEALTHCHECKS_UUID/start",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "84b74753-3523-4d88-b4bc-eed5a74eef99",
+      "name": "HC: Start",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        120,
+        600
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Meldet Healthchecks.io, dass der Lauf begonnen hat."
+    },
+    {
+      "parameters": {
+        "url": "https://hc-ping.com/YOUR_HEALTHCHECKS_UUID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "8c93a528-8131-4054-aed3-16c94c3ad282",
+      "name": "HC: Erfolg",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3840,
+        300
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Meldet Healthchecks.io, dass der Lauf erfolgreich beendet wurde."
     }
   ],
   "connections": {
@@ -451,7 +547,7 @@
       "main": [
         [
           {
-            "node": "Parameter",
+            "node": "HC: Start",
             "type": "main",
             "index": 0
           }
@@ -630,7 +726,7 @@
       "main": [
         [
           {
-            "node": "Parameter",
+            "node": "HC: Start",
             "type": "main",
             "index": 0
           }
@@ -642,6 +738,28 @@
         [
           {
             "node": "Antwort parsen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HC: Start": {
+      "main": [
+        [
+          {
+            "node": "Parameter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zusammenfassung": {
+      "main": [
+        [
+          {
+            "node": "HC: Erfolg",
             "type": "main",
             "index": 0
           }

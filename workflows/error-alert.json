@@ -1,5 +1,5 @@
 {
-  "name": "Fehlerbenachrichtigung (Telegram)",
+  "name": "Fehlerbenachrichtigung (Telegram) v1.1",
   "nodes": [
     {
       "id": "fb-note",
@@ -13,7 +13,7 @@
       "parameters": {
         "width": 760,
         "height": 260,
-        "content": "## Fehlerbenachrichtigung (Telegram)\n**Einrichten:**\n1. Im Knoten *Telegram senden* Credential **Telegram Jobsuche** anlegen (Token: @BotFather > /mybots > API Token) und auswählen.\n2. Chat ID ist eingetragen (privater Chat mit dem Bot). Vorher im Chat mit dem Bot einmal *Start* gedrückt haben.\n3. Speichern und veröffentlichen (Publish).\n4. Im Workflow *Employer-Scout v1.3.4*: Settings > **Error workflow** > diesen Workflow wählen.\n\nDer Error Trigger löst nur bei Läufen aus, die ein anderer Workflow ausgelöst hat (z. B. per Zeitplan), nicht bei manuellen Tests."
+        "content": "## Fehlerbenachrichtigung (Telegram) v1.1\n**Einrichten:**\n1. Im Knoten *Telegram senden* Credential **Telegram Jobsuche** wählen (Chat ID ist eingetragen).\n2. Speichern und veröffentlichen (Publish).\n3. In *Job-Scout v1.5*, *Scorer v1.5*, *Nachfassen v1.2*, *Employer-Scout v1.3.6*: Settings > **Error workflow** > diesen Workflow wählen.\n\nDer Error Trigger löst nur bei Läufen mit Status *Error* aus, die ein Zeitplan oder anderer Workflow gestartet hat, nicht bei manuellen Tests und nicht bei Canceled/Crashed (dafür: Healthchecks.io).\n**v1.1 (12.11.2026):** Kein Code-Knoten mehr. Die Nachricht wird direkt im Telegram-Knoten gebaut, damit sie auch kommt, wenn der Task-Runner des Servers ausgefallen ist (Ausfall 12.11.: v1 blieb stumm)."
       }
     },
     {
@@ -28,30 +28,17 @@
       "parameters": {}
     },
     {
-      "id": "fb-code",
-      "name": "Nachricht bauen",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        240,
-        100
-      ],
-      "parameters": {
-        "jsCode": "// Fehlermeldung für Telegram bauen (Klartext, ohne Markdown).\nconst j = $input.first().json;\nconst ex = j.execution || {};\nconst wf = j.workflow || {};\nconst err = ex.error || {};\nconst msg = String(err.message || 'unbekannter Fehler').slice(0, 600);\nconst text = [\n  '⚠️ n8n: Workflow fehlgeschlagen',\n  'Workflow: ' + (wf.name || '?'),\n  'Knoten: ' + (ex.lastNodeExecuted || '?'),\n  'Fehler: ' + msg,\n  'Lauf-ID: ' + (ex.id || '?') + (ex.mode ? ' (' + ex.mode + ')' : ''),\n  ex.url ? 'Öffnen: ' + ex.url : null,\n].filter(Boolean).join('\\n');\nreturn [{ json: { text } }];\n"
-      }
-    },
-    {
       "id": "fb-telegram",
       "name": "Telegram senden",
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        480,
+        240,
         100
       ],
       "parameters": {
         "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "={{ $json.text }}",
+        "text": "={{ ['⚠️ n8n: Workflow fehlgeschlagen', 'Workflow: ' + (($json.workflow || {}).name || '?'), 'Knoten: ' + (($json.execution || {}).lastNodeExecuted || '?'), 'Fehler: ' + String(((($json.execution || {}).error) || {}).message || 'unbekannter Fehler').slice(0, 600), 'Lauf-ID: ' + (($json.execution || {}).id || '?') + (($json.execution || {}).mode ? ' (' + $json.execution.mode + ')' : ''), ($json.execution || {}).url ? 'Öffnen: ' + $json.execution.url : ''].filter(Boolean).join('\\n') }}",
         "additionalFields": {
           "appendAttribution": false
         }
@@ -60,22 +47,14 @@
         "telegramApi": {
           "name": "Telegram Jobsuche"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000
     }
   ],
   "connections": {
     "Fehler-Auslöser": {
-      "main": [
-        [
-          {
-            "node": "Nachricht bauen",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Nachricht bauen": {
       "main": [
         [
           {

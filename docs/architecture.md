@@ -13,7 +13,8 @@
 ### Job-Scout (n8n, daily 03:17)
 
 ```
-Schedule ─► Parameter ─► read known jobs (Airtable) ─► three branches in parallel
+Schedule ─► ping start ─► server ready? (3 tries, 10 min apart; else Telegram + ping fail, stop)
+─► Parameter ─► read known jobs (Airtable) ─► three branches in parallel
    ├─ Federal Employment Agency: 30 search terms → search API (v6) → title pre-filter
    │    → commute check from coordinates → public detail page → plain text
    ├─ Gmail label "Job-Alerts": extract job links (LinkedIn, StepStone, Indeed, XING)
@@ -21,8 +22,8 @@ Schedule ─► Parameter ─► read known jobs (Airtable) ─► three branche
    └─ Wishlist career pages: detect known ATS from the URL
         (Personio, Greenhouse, Lever, Recruitee, Ashby, SmartRecruiters, Workable) → public API
 ─► merge ─► dedupe (canonical URL + normalised title/employer) ─► round-robin across sources
-─► cap (25 per run) ─► per job: text ≥ 300 chars? ─► Scorer │ else "pre-check" record
-─► short Telegram summary (only jobs ≥ 75 with links, the rest as counts)
+─► cap (25 per run, 8 slots reserved for the Federal Employment Agency) ─► per job: text ≥ 300 chars? ─► Scorer │ else "pre-check" record
+─► short Telegram summary (only jobs ≥ 75 with links, the rest as counts, failed Scorer calls counted) ─► ping success
 ```
 
 - Platforms are **not scraped**. LinkedIn, StepStone and others send job alerts by e-mail; n8n reads one Gmail label via OAuth. A new platform only needs the same label.
@@ -57,11 +58,19 @@ Airtable filter formula: follow-up date ≤ today and status *applied / intervie
 
 ### Error alert (n8n)
 
-Error Trigger workflow assigned as *Error workflow* in the scheduled workflows. Sends workflow, node, message and execution link to Telegram.
+Error Trigger workflow assigned as *Error workflow* in the scheduled workflows. Sends workflow, node, message and execution link to Telegram. Since v1.1 it has no Code node, so it still works when the server's task runner is down.
+
+### Watchdogs (outside n8n)
+
+- **Healthchecks.io**: one check per scheduled workflow (Job-Scout, Follow-up reminder, Employer-Scout). The workflow pings `/start` after the trigger and the plain URL at the end; the Job-Scout also pings `/fail` when the server is not ready. If the success ping does not arrive within the grace time, Healthchecks sends Telegram and e-mail. This also covers cancelled and crashed runs, which n8n's error workflow does not see.
+- **UptimeRobot**: checks the server's `/healthz/readiness` every 5 minutes, alerts by e-mail.
+- Readiness was "up" during the task-runner failure on 12 Nov, so it is not enough on its own; the retries on Code nodes and the Healthchecks pings cover that case.
 
 ### Writer (Claude)
 
-For jobs with score ≥ 75 and no exclusion:
+For jobs with score ≥ 75, no exclusion and my explicit "yes" in the Airtable column *Meine Entscheidung*:
+
+- employer check from online reviews (Kununu, Glassdoor, Google) → *Premium / Solid middle / Rather not*, plus the key facts without links; nothing invented. *Rather not* means no package;
 
 - cover letter as **e-mail text** (subject line, one paragraph per line, no hard line breaks) because most applications go by e-mail; PDF letter only as a secondary format;
 - CV tailored to the ad's wording, using **only evidenced experience** from a curated skills file;
@@ -73,6 +82,7 @@ Files go to a per-job folder in Google Drive. File names never contain the emplo
 
 **Jobs and applications**: title, link, source, scope, score 0–100, matches, gaps, hard criteria, status, discovered on, open questions, notes, applied on, follow up on, salary gross per year.
 Status flow: `Neu` → `Bewertet` → `Entwurf bereit` → `Freigegeben` → `Beworben` → `Antwort erhalten` / `Interview` (or `Nicht beworben`).
+Additional columns: *Nr.* (auto number, so I can name a job in chat by its number), *Meine Entscheidung* (my yes/no for the Writer), *Arbeitgeber-Check*, *Fakten*.
 A view "My selection" shows score ≥ 75 or any active application status.
 
 **Employer wishlist**: name, Berlin address (from imprint), industry, work mode, careers page, status, source, last checked, notes (cluster, distance, warnings, model used).
@@ -83,6 +93,8 @@ A view "My selection" shows score ≥ 75 or any active application status.
 | --- | --- |
 | Gemini 503 "high demand" | 3 retries with pause, then fallback model with its own quota |
 | Free-tier daily quota | 1 call per job, max 25 jobs per run; Employer-Scout 1 call per week |
-| Silent failures on schedule | Error workflow → Telegram |
-| Executions not inspectable | `saveDataSuccessExecution: all` on scheduled workflows |
+| Silent failures on schedule | Error workflow → Telegram (no Code node since v1.1) |
+| Cancelled or crashed runs, server down | Healthchecks.io pings, UptimeRobot, readiness check before the run |
+| Task runner briefly not available | every Code node retries up to 5× with 5 s pause |
+| Executions not inspectable | `saveDataSuccessExecution: all` on scheduled workflows for now; switched off once runs are stable, because execution data contains alert e-mails |
 | Training-provider n8n instance | narrow, replaceable keys; workflows exported as versioned JSON |

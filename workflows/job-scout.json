@@ -1,77 +1,72 @@
 {
-  "name": "Job-Scout v1.2",
+  "name": "Job-Scout v1.6",
   "nodes": [
     {
-      "id": "js-note",
+      "parameters": {
+        "content": "## Job-Scout v1.6\nFindet neue Stellen aus drei Quellen und übergibt sie an den Scorer. Läuft täglich um 3:17 (Europe/Berlin). Manuell testen: Knoten *Start*.\n**Quellen:** 1) Bundesagentur für Arbeit (Jobsuche-API, öffentlicher Key, kein Login; je Stichwort zwei Abfragen: Berlin 25 km und bundesweit Homeoffice) 2) Gmail-Label mit Job-Alerts (LinkedIn, StepStone, Indeed, XING ...) 3) Karriereseiten der Wunschliste, sofern sie auf einem bekannten ATS laufen (Personio, Greenhouse, Lever, Recruitee, Ashby, SmartRecruiters, Workable).\n**Vor dem ersten Lauf:**\n1. *Bekannte Stellen lesen*, *Wunschliste lesen*, *Vorprüfung speichern*: Credential **Airtable Jobsuche**.\n2. *Gmail: Alerts lesen*: Credential **Gmail Jobsuche** (Google OAuth2, Gmail API aktiviert, Redirect-URL aus n8n kopieren). Label-Name im Knoten *Parameter* (GMAIL_LABEL) eintragen.\n3. *Scorer aufrufen*: Workflow **Scorer v1.5** auswählen (der hat den Eingang *Vom Job-Scout*).\n4. *Telegram senden*: Credential **Telegram Jobsuche**.\n**Ort:** Der Scout filtert NICHT nach Ort. Der Scorer prüft im Text: Berlin oder vollständig remote = normal bewertet; anderer Ort mit Präsenz/Hybrid = Ausschluss.\n**Ablauf:** Stellen sammeln → gegen Airtable (Stellen und Bewerbungen) entdoppeln → Titel-Vorfilter (Cluster-Stichwörter, Negativ-Wörter) → max. MAX_PER_RUN Stellen pro Lauf → je Stelle: Anzeigentext lang genug? Ja: Scorer (1 Gemini-Aufruf). Nein: Datensatz mit Status *Neu* und Hinweis *Vorprüfung* (Link selbst öffnen). Danach eine Telegram-Zusammenfassung.\nGemini-Budget: MAX_PER_RUN Aufrufe pro Tag, 5 s Pause dazwischen. Nichts geht an Arbeitgeber.\n**v1.1 (08.11.2026):** BA-Suche v6 + öffentliche Detailseite; Arbeitsweg ab REFERENCE_POINT (> 7 km ohne Homeoffice = verworfen); reihum je Suchbegriff und Quelle; Gmail: StepStone-Tracking-Links, Firma/Ort aus der Mail; Telegram zählt alle Bewertungen; Meldung auch an Tagen ohne neue Stellen; IF-Knoten im aktuellen n8n-Format.\n**v1.4 (10.11.2026):** StepStone-Mail-Links werden ohne Weiterleitung aufgelöst, gespeichert und geladen wird nur die saubere Adresse (stellenangebote----<Nr>-inline.html); Cookie-/Login-/Sperrseiten gelten als *kein Text* (Vorprüfung, nie Scorer); Titel-Vorfilter für Alert-Links schon vor dem Laden; geladen werden höchstens MAX_PER_RUN Seiten je Quelle; BA-Suchbegriffe reihum mit täglich wechselndem Start; erfolgreiche Läufe und Zwischenstände werden gespeichert (Diagnose).\n**v1.5 (12.11.2026):** Absicherung gegen Serverausfälle. Vor dem Lauf Prüfung /healthz/readiness (3 Versuche, je 10 Min. Abstand, sonst Abbruch mit Telegram). Pings an Healthchecks.io (Start, Erfolg, Fehler): kommt bis 04:02 kein Erfolg, meldet Healthchecks per Telegram und Mail. Alle Code-Knoten wiederholen bis zu 5× (5 s Pause), falls der Task-Runner kurz nicht bereit ist (Ausfall 12.11.). *Scorer-Eingabe* ist jetzt ein Edit-Fields-Knoten (braucht keinen Runner). Fehlerhafte Scorer-Aufrufe zählen im Telegram-Bericht. BA_RESERVE Plätze im Tageslimit sind für die Bundesagentur reserviert. Timeout 60 Min. (wegen der Wartezeiten).\n**v1.6 (12.11.2026):** Jeder Knoten hat eine kurze Beschreibung in *Settings > Notes*. Logik unverändert gegenüber v1.5.",
+        "height": 640,
+        "width": 1100
+      },
+      "id": "fe4e6005-36be-45bd-9d1e-5192bb6a2a8f",
       "name": "Anleitung",
       "type": "n8n-nodes-base.stickyNote",
       "typeVersion": 1,
       "position": [
-        -40,
-        -420
-      ],
-      "parameters": {
-        "width": 1100,
-        "height": 440,
-        "content": "## Job-Scout v1.2\nFindet neue Stellen aus drei Quellen und übergibt sie an den Scorer. Läuft täglich um 3:17 (Europe/Berlin). Manuell testen: Knoten *Start*.\n**Quellen:** 1) Bundesagentur für Arbeit (Jobsuche-API, öffentlicher Key, kein Login; je Stichwort zwei Abfragen: Berlin 25 km und bundesweit Homeoffice) 2) Gmail-Label mit Job-Alerts (LinkedIn, StepStone, Indeed, XING ...) 3) Karriereseiten der Wunschliste, sofern sie auf einem bekannten ATS laufen (Personio, Greenhouse, Lever, Recruitee, Ashby, SmartRecruiters, Workable).\n**Vor dem ersten Lauf:**\n1. *Bekannte Stellen lesen*, *Wunschliste lesen*, *Vorprüfung speichern*: Credential **Airtable Jobsuche**.\n2. *Gmail: Alerts lesen*: Credential **Gmail Jobsuche** (Google OAuth2, Gmail API aktiviert, Redirect-URL aus n8n kopieren). Label-Name im Knoten *Parameter* (GMAIL_LABEL) eintragen.\n3. *Scorer aufrufen*: Workflow **Scorer v1.2** (bzw. Scorer v1.1 mit neuem Parameter-Knoten) auswählen (der hat den Eingang *Vom Job-Scout*).\n4. *Telegram senden*: Credential **Telegram Jobsuche**.\n**Ort:** Der Scout filtert NICHT nach Ort. Der Scorer prüft im Text: Berlin oder vollständig remote = normal bewertet; anderer Ort mit Präsenz/Hybrid = Ausschluss.\n**Ablauf:** Stellen sammeln → gegen Airtable (Stellen und Bewerbungen) entdoppeln → Titel-Vorfilter (Cluster-Stichwörter, Negativ-Wörter) → max. MAX_PER_RUN Stellen pro Lauf → je Stelle: Anzeigentext lang genug? Ja: Scorer (1 Gemini-Aufruf). Nein: Datensatz mit Status *Neu* und Hinweis *Vorprüfung* (Link selbst öffnen). Danach eine Telegram-Zusammenfassung. Keine Wait-Pause mehr (hielt manuelle Läufe im Status 'Running' fest); der Gemini-Aufruf selbst dauert einige Sekunden, bei 429 greifen die Wiederholungen im Scorer.\nGemini-Budget: MAX_PER_RUN Aufrufe pro Tag, 5 s Pause dazwischen. Nichts geht an Arbeitgeber.\n**v1.1 (08.11.2026):** BA-Suche v6 + öffentliche Detailseite; Arbeitsweg ab REFERENCE_POINT (> 7 km ohne Homeoffice = verworfen); reihum je Suchbegriff und Quelle; Gmail: StepStone-Tracking-Links, Firma/Ort aus der Mail; Telegram zählt alle Bewertungen; Meldung auch an Tagen ohne neue Stellen; IF-Knoten im aktuellen n8n-Format.\n**v1.2 (08.11.2026):** = v1.1 + Live-Korrekturen: Knoten *Pause 5 s* entfernt (Lauf blieb auf Running hängen), Telegram im HTML-Modus mit escaped Sonderzeichen, kurze Telegram-Zusammenfassung, Zeitplan täglich 3:17."
-      }
+        544,
+        1104
+      ]
     },
     {
-      "id": "js-start",
+      "parameters": {},
+      "id": "e27c6d85-1b0f-4f39-a0c5-d0f83cc20210",
       "name": "Start",
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        200
+        592,
+        1728
       ],
-      "parameters": {}
+      "notes": "Startet den Lauf manuell zum Testen."
     },
     {
-      "id": "js-zeitplan",
-      "name": "Zeitplan (täglich 3:17)",
-      "type": "n8n-nodes-base.scheduleTrigger",
-      "typeVersion": 1.2,
-      "position": [
-        0,
-        400
-      ],
       "parameters": {
         "rule": {
           "interval": [
             {
-              "field": "days",
-              "daysInterval": 1,
               "triggerAtHour": 3,
               "triggerAtMinute": 17
             }
           ]
         }
-      }
+      },
+      "id": "d6161258-ee30-4eb4-b452-5c8b01b20817",
+      "name": "Zeitplan (täglich 3:17)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        1936
+      ],
+      "notes": "Startet den Lauf jeden Tag um 3:17 Uhr (Europe/Berlin)."
     },
     {
-      "id": "js-parameter",
+      "parameters": {
+        "jsCode": "// ===== Job-Scout: Parameter (nur hier ändern) =====\nconst GMAIL_LABEL = 'Job-Alerts';     // Name des Gmail-Labels, das die Alert-Mails bekommen\nconst GMAIL_DAYS = 2;                 // nur Mails der letzten N Tage\nconst BA_DAYS = 2;                    // Bundesagentur: veröffentlicht in den letzten N Tagen\nconst BA_RADIUS_KM = 25;              // um Berlin\nconst MAX_PER_RUN = 25;               // Obergrenze neuer Stellen pro Lauf (= max. Gemini-Aufrufe)\nconst BA_RESERVE = 8;                 // v1.5: so viele Plätze davon bleiben für die Bundesagentur reserviert (wenn BA genug Treffer hat)\nconst MIN_TEXT = 300;\nconst HOME = { lat: 0, lon: 0 };  // REFERENCE_POINT: Koordinaten deines Bezugspunkts eintragen\nconst MAX_KM = 7;                     // Büro höchstens ~7 km Luftlinie (= max. 30 Min. ÖPNV/Fahrrad), sonst nur bei 100 % remote                 // kürzerer Anzeigentext -> Vorprüfung statt Scorer\n\n// Suchbegriffe für die Bundesagentur (ein Aufruf pro Begriff)\nconst BA_KEYWORDS = [\n  'Projektassistenz', 'Projektassistent', 'Assistenz Projektmanagement', 'Projektkoordination', 'Project Coordinator',\n  'Projektorganisation', 'PMO', 'Projektmanagement Office',\n  'Projektcontrolling', 'Projektsteuerung', 'Junior Controller', 'Kaufmännische Projektsteuerung', 'Projektkaufmann',\n  'Kostencontrolling', 'Projektabrechnung', 'Reporting',\n  'Operations Specialist', 'Business Operations', 'Prozessmanagement', 'Prozessmanager', 'Prozessoptimierung',\n  'Business Process Management', 'Business Analyst', 'Prozessautomatisierung', 'Workflow Automatisierung', 'Automatisierung n8n',\n  'KI Automatisierung', 'Low-Code', 'BPMN', 'Digitalisierung Geschäftsprozesse',\n];\n\n// Titel-Vorfilter: mindestens ein Treffer (Kleinschreibung, Teilstring) nötig\nconst TITLE_MUST = ['projekt', 'project', 'pmo', 'koordinat', 'coordinat', 'controll', 'operations', 'prozess', 'process',\n  'automat', 'business analy', 'reporting', 'abrechnung', 'kaufmänn', 'kaufmaenn', 'digitalisierung', 'bpmn', 'low-code', 'low code',\n  'workflow', 'unit-assisten', 'team-assisten', 'teamassisten', 'assistenz projekt'];\n// Titel-Vorfilter: kein Treffer erlaubt\nconst TITLE_NOT = ['empfang', 'rezeption', 'kasse', 'kassier', 'fraud', 'kyc', 'payroll', 'lohn', 'gehaltsabrechnung', 'store',\n  'filiale', 'sekretariat', 'sekretär', 'büromanagement', 'assistenz der geschäftsführung', 'geschäftsführungsassisten',\n  'head of', 'leiter', 'leitung', 'director', 'teamlead', 'team lead', 'senior', 'praktik', 'werkstudent', 'ausbildung',\n  'azubi', 'trainee', 'pflege', 'arzt', 'ärzt', 'ingenieur', 'engineer (m', 'software engineer', 'developer', 'entwickler'];\n\n// Ort wird im Scout NICHT gefiltert (Entscheidung 2026-11-08). Der Scorer entscheidet anhand des Anzeigentexts.\n\nreturn [{ json: {\n  gmail_label: GMAIL_LABEL, gmail_days: GMAIL_DAYS, ba_days: BA_DAYS, ba_radius: BA_RADIUS_KM,\n  max_per_run: MAX_PER_RUN, ba_reserve: BA_RESERVE, min_text: MIN_TEXT,\n  ba_keywords: BA_KEYWORDS, title_must: TITLE_MUST, title_not: TITLE_NOT, home: HOME, max_km: MAX_KM,\n} }];\n"
+      },
+      "id": "d1d0fccf-fc06-40cb-a9ee-934722538201",
       "name": "Parameter",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        300
+        832,
+        1824
       ],
-      "parameters": {
-        "jsCode": "// ===== Job-Scout: Parameter (nur hier ändern) =====\nconst GMAIL_LABEL = 'Job-Alerts';     // Name des Gmail-Labels, das die Alert-Mails bekommen\nconst GMAIL_DAYS = 2;                 // nur Mails der letzten N Tage\nconst BA_DAYS = 2;                    // Bundesagentur: veröffentlicht in den letzten N Tagen\nconst BA_RADIUS_KM = 25;              // um Berlin\nconst MAX_PER_RUN = 25;               // Obergrenze neuer Stellen pro Lauf (= max. Gemini-Aufrufe)\nconst MIN_TEXT = 300;\nconst HOME = { lat: 0, lon: 0 };  // REFERENCE_POINT: Koordinaten deines Bezugspunkts für den Arbeitsweg eintragen\nconst MAX_KM = 7;                     // Büro höchstens ~7 km Luftlinie (= max. 30 Min. ÖPNV/Fahrrad), sonst nur bei 100 % remote                 // kürzerer Anzeigentext -> Vorprüfung statt Scorer\n\n// Suchbegriffe für die Bundesagentur (ein Aufruf pro Begriff)\nconst BA_KEYWORDS = [\n  'Projektassistenz', 'Projektassistent', 'Assistenz Projektmanagement', 'Projektkoordination', 'Project Coordinator',\n  'Projektorganisation', 'PMO', 'Projektmanagement Office',\n  'Projektcontrolling', 'Projektsteuerung', 'Junior Controller', 'Kaufmännische Projektsteuerung', 'Projektkaufmann',\n  'Kostencontrolling', 'Projektabrechnung', 'Reporting',\n  'Operations Specialist', 'Business Operations', 'Prozessmanagement', 'Prozessmanager', 'Prozessoptimierung',\n  'Business Process Management', 'Business Analyst', 'Prozessautomatisierung', 'Workflow Automatisierung', 'Automatisierung n8n',\n  'KI Automatisierung', 'Low-Code', 'BPMN', 'Digitalisierung Geschäftsprozesse',\n];\n\n// Titel-Vorfilter: mindestens ein Treffer (Kleinschreibung, Teilstring) nötig\nconst TITLE_MUST = ['projekt', 'project', 'pmo', 'koordinat', 'coordinat', 'controll', 'operations', 'prozess', 'process',\n  'automat', 'business analy', 'reporting', 'abrechnung', 'kaufmänn', 'kaufmaenn', 'digitalisierung', 'bpmn', 'low-code', 'low code',\n  'workflow', 'unit-assisten', 'team-assisten', 'teamassisten', 'assistenz projekt'];\n// Titel-Vorfilter: kein Treffer erlaubt\nconst TITLE_NOT = ['empfang', 'rezeption', 'kasse', 'kassier', 'fraud', 'kyc', 'payroll', 'lohn', 'gehaltsabrechnung', 'store',\n  'filiale', 'sekretariat', 'sekretär', 'büromanagement', 'assistenz der geschäftsführung', 'geschäftsführungsassisten',\n  'head of', 'leiter', 'leitung', 'director', 'teamlead', 'team lead', 'senior', 'praktik', 'werkstudent', 'ausbildung',\n  'azubi', 'trainee', 'pflege', 'arzt', 'ärzt', 'ingenieur', 'engineer (m', 'software engineer', 'developer', 'entwickler'];\n\n// Ort wird im Scout NICHT gefiltert (Entscheidung 2026-11-08). Der Scorer entscheidet anhand des Anzeigentexts.\n\nreturn [{ json: {\n  gmail_label: GMAIL_LABEL, gmail_days: GMAIL_DAYS, ba_days: BA_DAYS, ba_radius: BA_RADIUS_KM,\n  max_per_run: MAX_PER_RUN, min_text: MIN_TEXT,\n  ba_keywords: BA_KEYWORDS, title_must: TITLE_MUST, title_not: TITLE_NOT, home: HOME, max_km: MAX_KM,\n} }];\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Enthält alle Einstellungen des Laufs (Suchbegriffe, Limits, Titelfilter) und ist der einzige Ort für Änderungen."
     },
     {
-      "id": "js-bekannt",
-      "name": "Bekannte Stellen lesen",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [
-        480,
-        300
-      ],
-      "alwaysOutputData": true,
       "parameters": {
         "operation": "search",
         "base": {
@@ -84,56 +79,79 @@
           "value": "YOUR_JOBS_TABLE_ID",
           "mode": "id"
         },
-        "returnAll": true,
         "options": {}
       },
+      "id": "abfc433e-847b-4e10-836a-4fac9151b45e",
+      "name": "Bekannte Stellen lesen",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1072,
+        1824
+      ],
+      "alwaysOutputData": true,
       "credentials": {
         "airtableTokenApi": {
+          "id": "UsXzqEWX18Q293Vh",
           "name": "Airtable Jobsuche"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notes": "Liest alle vorhandenen Stellen aus Airtable, damit nichts doppelt bewertet wird."
     },
     {
-      "id": "js-quellen",
+      "parameters": {
+        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote----' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\n// Bekannte Stellen aus Airtable -> Schlüssel (URL und Titel+Arbeitgeber), damit nichts doppelt bewertet wird.\nconst urls = new Set(), keys = new Set();\nfor (const it of $input.all()) {\n  const f = (it.json && it.json.fields) || it.json || {};\n  if (f['Link zur Stelle']) urls.add(canonUrl(f['Link zur Stelle']));\n  if (f['Stellentitel']) keys.add(normKey(f['Stellentitel']));\n}\nreturn [{ json: { known_urls: [...urls], known_keys: [...keys], known_count: urls.size } }];\n"
+      },
+      "id": "b6b17c7b-2c60-4b79-931f-92c25f3af3cd",
       "name": "Quellen vorbereiten",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        720,
-        300
+        1312,
+        1824
       ],
-      "parameters": {
-        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote--' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\n// Bekannte Stellen aus Airtable -> Schlüssel (URL und Titel+Arbeitgeber), damit nichts doppelt bewertet wird.\nconst urls = new Set(), keys = new Set();\nfor (const it of $input.all()) {\n  const f = (it.json && it.json.fields) || it.json || {};\n  if (f['Link zur Stelle']) urls.add(canonUrl(f['Link zur Stelle']));\n  if (f['Stellentitel']) keys.add(normKey(f['Stellentitel']));\n}\nreturn [{ json: { known_urls: [...urls], known_keys: [...keys], known_count: urls.size } }];\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Erstellt aus den bekannten Stellen Listen von Links und Titeln für den Dublettenabgleich."
     },
     {
-      "id": "js-ba-q",
+      "parameters": {
+        "jsCode": "\nconst P = $('Parameter').first().json;\nconst base = 'https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v6/jobs';\nconst out = [];\nfor (const k of P.ba_keywords) {\n  out.push({ json: { keyword: k, scope: 'Berlin', url: `${base}?was=${encodeURIComponent(k)}&wo=Berlin&umkreis=${P.ba_radius}&angebotsart=1&veroeffentlichtseit=${P.ba_days}&size=50&page=1` } });\n  // Homeoffice-Abfrage (arbeitszeit=ho) liefert in v6 keine Treffer mehr (08.11.2026) -> entfernt\n}\nreturn out;\n"
+      },
+      "id": "f913d988-fe55-40ac-81b5-2ea8bd4c5999",
       "name": "BA: Abfragen bauen",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        980,
-        100
+        1568,
+        1632
       ],
-      "parameters": {
-        "jsCode": "\nconst P = $('Parameter').first().json;\nconst base = 'https://rest.arbeitsagentur.de/jobboerse/jobsuche-service/pc/v6/jobs';\nconst out = [];\nfor (const k of P.ba_keywords) {\n  out.push({ json: { keyword: k, scope: 'Berlin', url: `${base}?was=${encodeURIComponent(k)}&wo=Berlin&umkreis=${P.ba_radius}&angebotsart=1&veroeffentlichtseit=${P.ba_days}&size=50&page=1` } });\n  // Homeoffice-Abfrage (arbeitszeit=ho) liefert in v6 keine Treffer mehr (08.11.2026) -> entfernt\n}\nreturn out;\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Erstellt je Suchbegriff eine Anfrage an die Jobsuche-API der Bundesagentur für Arbeit."
     },
     {
-      "id": "js-ba-s",
-      "name": "BA: Suche",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1220,
-        100
-      ],
-      "onError": "continueRegularOutput",
-      "alwaysOutputData": true,
       "parameters": {
         "url": "={{ $json.url }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-API-Key",
+              "value": "jobboerse-jobsuche"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
         "options": {
-          "timeout": 20000,
           "batching": {
             "batch": {
               "batchSize": 2,
@@ -146,8 +164,42 @@
               "neverError": true,
               "responseFormat": "text"
             }
-          }
-        },
+          },
+          "timeout": 20000
+        }
+      },
+      "id": "a9dfe528-a53a-4d06-ab70-8b6267aab0ad",
+      "name": "BA: Suche",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1808,
+        1632
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Ruft die Jobsuche-API der Bundesagentur für jeden Suchbegriff ab."
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote----' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\n// v6-Antwort: data.ergebnisliste (v4: data.stellenangebote). Feldnamen beider Versionen werden gelesen.\nconst known = $('Quellen vorbereiten').first().json;\nconst knownUrls = new Set(known.known_urls), knownKeys = new Set(known.known_keys);\nconst queries = $('BA: Abfragen bauen').all();\nconst rad = x => x * Math.PI / 180;\nconst km = (a, b) => { const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon); const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2; return 6371 * 2 * Math.asin(Math.sqrt(h)); };\nconst seen = new Set(); const out = []; let total = 0, errors = 0, tooFar = 0;\nconst inputs = $input.all();\nfor (let qi = 0; qi < inputs.length; qi++) {\n  const it = inputs[qi]; const kw = (queries[qi] && queries[qi].json.keyword) || '';\n  const j = it.json || {};\n  if (j.error || (j.statusCode && j.statusCode !== 200)) { errors++; continue; }\n  let data = j;\n  if (typeof j.data === 'string') { try { data = JSON.parse(j.data); } catch (e) { errors++; continue; } }\n  else if (j.data && typeof j.data === 'object') data = j.data;\n  const list = (data && (data.ergebnisliste || data.stellenangebote)) || [];\n  total += list.length;\n  for (const s of list) {\n    const ref = s.referenznummer || s.refnr; if (!ref || seen.has(ref)) continue; seen.add(ref);\n    const title = s.stellenangebotsTitel || s.titel || s.hauptberuf || '';\n    const employer = s.firma || s.arbeitgeber || '';\n    const loc = (s.stellenlokationen && s.stellenlokationen[0] && s.stellenlokationen[0].adresse) || s.arbeitsort || {};\n    const ort = loc.ort || loc.region || '';\n    if (!titleOk(title)) continue;\n    // Arbeitsweg: Entfernung Büro <-> REFERENCE_POINT (Luftlinie)\n    const lok = s.stellenlokationen && s.stellenlokationen[0];\n    let dist = null;\n    if (lok && lok.breite && lok.laenge) dist = Math.round(km(P.home, { lat: +lok.breite, lon: +lok.laenge }) * 10) / 10;\n    if (dist !== null && dist > P.max_km && !s.homeofficemoeglich) { tooFar++; continue; }\n    const url = 'https://www.arbeitsagentur.de/jobsuche/jobdetail/' + encodeURIComponent(ref);\n    if (knownUrls.has(canonUrl(url)) || knownKeys.has(normKey(title + ' ' + employer))) continue;\n    const facts = [\n      'Beruf laut BA: ' + [s.hauptberuf].concat(s.alleBerufe || []).filter((x, i, a) => x && a.indexOf(x) === i).join(', '),\n      ort ? 'Arbeitsort: ' + [loc.plz, ort].filter(Boolean).join(' ') : null,\n      s.homeofficemoeglich !== undefined ? 'Homeoffice möglich: ' + (s.homeofficemoeglich ? 'ja' : 'nein') + (s.homeofficetyp ? ' (' + s.homeofficetyp + ')' : '') : null,\n      (s.gehaltsspanneVon || s.gehaltsspanneBis) ? 'Gehalt: ' + [s.gehaltsspanneVon, s.gehaltsspanneBis].filter(Boolean).join(' bis ') + (s.artDerVerguetung ? ' (' + s.artDerVerguetung + ')' : '') : null,\n      dist !== null ? 'Entfernung Büro – REFERENCE_POINT: ' + String(dist).replace('.', ',') + ' km Luftlinie' + (dist > P.max_km ? ' (zu weit für Präsenz; passt nur bei 100 % remote)' : ' (im Radius)') : null,\n      s.vertragsdauer ? 'Vertrag: ' + s.vertragsdauer : null,\n      s.eintrittszeitraum && s.eintrittszeitraum.von ? 'Eintritt ab: ' + s.eintrittszeitraum.von : null,\n    ].filter(Boolean).join('\\n');\n    out.push({ json: { ext_id: ref, kw, title, employer, place: ort, url, source: 'Bundesagentur für Arbeit', facts,\n      detail_url: url,   // öffentliche Detailseite (serverseitig gerendert); die REST-Detail-Endpunkte v3/v4 liefern 403 (Stand 08.11.2026)\n      external_url: s.externeURL || s.externeUrl || null } });\n  }\n}\nif (!out.length) return [{ json: { nothing: true, _ba: { total, errors, kept: 0, too_far: tooFar } } }];\n// Reihum je Suchbegriff (sonst kommen nur Treffer des ersten Begriffs durch), dann begrenzen\nconst groups = {}; for (const o of out) (groups[o.json.kw] = groups[o.json.kw] || []).push(o);\n// Kreis-Start täglich verschieben: an jedem Tag steht ein anderer Suchbegriff vorn,\n// innerhalb von 30 Tagen war jeder Begriff einmal Erster (gleiche Rechnung in \"Neue Stellen filtern\").\nconst dayNo = Math.floor(Date.now() / 86400000);\nconst kwAll = P.ba_keywords;\nconst shift = kwAll.length ? dayNo % kwAll.length : 0;\nconst kwOrder = kwAll.slice(shift).concat(kwAll.slice(0, shift));\nconst keys = kwOrder.filter(k => groups[k]).concat(Object.keys(groups).filter(k => !kwOrder.includes(k)));\nconst rr = []; let more = true;\nfor (let i = 0; more; i++) { more = false; for (const k of keys) if (groups[k][i]) { rr.push(groups[k][i]); more = true; } }\nconst limited = rr.slice(0, P.max_per_run);   // v1.4: nur so viele Detailseiten laden, wie in das Tageslimit passen\nlimited[0].json._ba = { total, errors, kept: out.length, too_far: tooFar, details_loaded: limited.length, start_kw: kwOrder[0] || null };\nreturn limited;\n"
+      },
+      "id": "eec043a9-72eb-4e43-a542-ee193fc41228",
+      "name": "BA: Treffer sammeln",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        1632
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Filtert die BA-Treffer nach Titel und Arbeitsweg, entfernt Dubletten und begrenzt die Menge."
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.nothing ? 'https://invalid.invalid' : $json.detail_url }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -160,37 +212,8 @@
               "value": "application/json"
             }
           ]
-        }
-      }
-    },
-    {
-      "id": "js-ba-c",
-      "name": "BA: Treffer sammeln",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        1460,
-        100
-      ],
-      "parameters": {
-        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote--' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\n// v6-Antwort: data.ergebnisliste (v4: data.stellenangebote). Feldnamen beider Versionen werden gelesen.\nconst known = $('Quellen vorbereiten').first().json;\nconst knownUrls = new Set(known.known_urls), knownKeys = new Set(known.known_keys);\nconst queries = $('BA: Abfragen bauen').all();\nconst rad = x => x * Math.PI / 180;\nconst km = (a, b) => { const dLat = rad(b.lat - a.lat), dLon = rad(b.lon - a.lon); const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2; return 6371 * 2 * Math.asin(Math.sqrt(h)); };\nconst seen = new Set(); const out = []; let total = 0, errors = 0, tooFar = 0;\nconst inputs = $input.all();\nfor (let qi = 0; qi < inputs.length; qi++) {\n  const it = inputs[qi]; const kw = (queries[qi] && queries[qi].json.keyword) || '';\n  const j = it.json || {};\n  if (j.error || (j.statusCode && j.statusCode !== 200)) { errors++; continue; }\n  let data = j;\n  if (typeof j.data === 'string') { try { data = JSON.parse(j.data); } catch (e) { errors++; continue; } }\n  else if (j.data && typeof j.data === 'object') data = j.data;\n  const list = (data && (data.ergebnisliste || data.stellenangebote)) || [];\n  total += list.length;\n  for (const s of list) {\n    const ref = s.referenznummer || s.refnr; if (!ref || seen.has(ref)) continue; seen.add(ref);\n    const title = s.stellenangebotsTitel || s.titel || s.hauptberuf || '';\n    const employer = s.firma || s.arbeitgeber || '';\n    const loc = (s.stellenlokationen && s.stellenlokationen[0] && s.stellenlokationen[0].adresse) || s.arbeitsort || {};\n    const ort = loc.ort || loc.region || '';\n    if (!titleOk(title)) continue;\n    // Arbeitsweg: Entfernung Büro <-> Bezugspunkt (Luftlinie)\n    const lok = s.stellenlokationen && s.stellenlokationen[0];\n    let dist = null;\n    if (lok && lok.breite && lok.laenge) dist = Math.round(km(P.home, { lat: +lok.breite, lon: +lok.laenge }) * 10) / 10;\n    if (dist !== null && dist > P.max_km && !s.homeofficemoeglich) { tooFar++; continue; }\n    const url = 'https://www.arbeitsagentur.de/jobsuche/jobdetail/' + encodeURIComponent(ref);\n    if (knownUrls.has(canonUrl(url)) || knownKeys.has(normKey(title + ' ' + employer))) continue;\n    const facts = [\n      'Beruf laut BA: ' + [s.hauptberuf].concat(s.alleBerufe || []).filter((x, i, a) => x && a.indexOf(x) === i).join(', '),\n      ort ? 'Arbeitsort: ' + [loc.plz, ort].filter(Boolean).join(' ') : null,\n      s.homeofficemoeglich !== undefined ? 'Homeoffice möglich: ' + (s.homeofficemoeglich ? 'ja' : 'nein') + (s.homeofficetyp ? ' (' + s.homeofficetyp + ')' : '') : null,\n      (s.gehaltsspanneVon || s.gehaltsspanneBis) ? 'Gehalt: ' + [s.gehaltsspanneVon, s.gehaltsspanneBis].filter(Boolean).join(' bis ') + (s.artDerVerguetung ? ' (' + s.artDerVerguetung + ')' : '') : null,\n      dist !== null ? 'Entfernung Büro – REFERENCE_POINT: ' + String(dist).replace('.', ',') + ' km Luftlinie' + (dist > P.max_km ? ' (zu weit für Präsenz; passt nur bei 100 % remote)' : ' (im Radius)') : null,\n      s.vertragsdauer ? 'Vertrag: ' + s.vertragsdauer : null,\n      s.eintrittszeitraum && s.eintrittszeitraum.von ? 'Eintritt ab: ' + s.eintrittszeitraum.von : null,\n    ].filter(Boolean).join('\\n');\n    out.push({ json: { ext_id: ref, kw, title, employer, place: ort, url, source: 'Bundesagentur für Arbeit', facts,\n      detail_url: url,   // öffentliche Detailseite (serverseitig gerendert); die REST-Detail-Endpunkte v3/v4 liefern 403 (Stand 08.11.2026)\n      external_url: s.externeURL || s.externeUrl || null } });\n  }\n}\nif (!out.length) return [{ json: { nothing: true, _ba: { total, errors, kept: 0, too_far: tooFar } } }];\n// Reihum je Suchbegriff (sonst kommen nur Treffer des ersten Begriffs durch), dann begrenzen\nconst groups = {}; for (const o of out) (groups[o.json.kw] = groups[o.json.kw] || []).push(o);\nconst rr = []; const keys = Object.keys(groups); let more = true;\nfor (let i = 0; more; i++) { more = false; for (const k of keys) if (groups[k][i]) { rr.push(groups[k][i]); more = true; } }\nconst limited = rr.slice(0, P.max_per_run * 2);\nlimited[0].json._ba = { total, errors, kept: out.length, too_far: tooFar, details_loaded: limited.length };\nreturn limited;\n"
-      }
-    },
-    {
-      "id": "js-ba-d",
-      "name": "BA: Details",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1700,
-        100
-      ],
-      "onError": "continueRegularOutput",
-      "alwaysOutputData": true,
-      "parameters": {
-        "url": "={{ $json.nothing ? 'https://invalid.invalid' : $json.detail_url }}",
+        },
         "options": {
-          "timeout": 20000,
           "batching": {
             "batch": {
               "batchSize": 1,
@@ -203,47 +226,40 @@
               "neverError": true,
               "responseFormat": "text"
             }
-          }
-        },
-        "sendHeaders": true,
-        "headerParameters": {
-          "parameters": [
-            {
-              "name": "X-API-Key",
-              "value": "jobboerse-jobsuche"
-            },
-            {
-              "name": "Accept",
-              "value": "application/json"
-            }
-          ]
+          },
+          "timeout": 20000
         }
-      }
+      },
+      "id": "1bd3ab61-b8ee-4d02-931a-c2cc91a50fde",
+      "name": "BA: Details",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2288,
+        1632
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Lädt die öffentliche Detailseite jeder ausgewählten BA-Stelle."
     },
     {
-      "id": "js-ba-n",
+      "parameters": {
+        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote----' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\nconst jobs = $('BA: Treffer sammeln').all();\nif (jobs.length === 1 && jobs[0].json.nothing) return [{ json: { nothing: true, _ba: jobs[0].json._ba } }];\nconst det = $input.all();\nconst out = [];\nfor (let i = 0; i < jobs.length; i++) {\n  const j = jobs[i].json; const d = (det[i] && det[i].json) || {};\n  let data = {}, text = '';\n  const raw = typeof d.data === 'string' ? d.data : (typeof d.body === 'string' ? d.body : '');\n  if (d.statusCode === 200 && raw) {\n    if (/^\\s*[{\\[]/.test(raw)) {\n      try { data = JSON.parse(raw); } catch (e) { data = {}; }\n      text = htmlToText(data.stellenangebotsBeschreibung || data.stellenbeschreibung || '');\n    } else {\n      // Öffentliche Detailseite: Hauptinhalt als Text\n      const m = raw.match(/<main[\\s\\S]*?<\\/main>/i) || raw.match(/<body[\\s\\S]*?<\\/body>/i);\n      text = htmlToText(m ? m[0] : raw)\n        .split('\\n').filter(l => !/^(Bitte anmelden|Merken|Teilen|Drucken|Zurück|Cookie|Sicherheitsabfrage|Zur Jobsuche|Startseite|Info zur Bewerbung|Vormerken|Notiz|Status Notiz|Bewerbungsstatus|PDF|Veröffentlichungsdatum)/i.test(l.trim())).join('\\n');\n    }\n  }\n  const extra = [j.facts || null, data.arbeitgeber ? 'Arbeitgeber: ' + data.arbeitgeber : null,\n    data.arbeitsorte && data.arbeitsorte[0] ? 'Arbeitsort: ' + [data.arbeitsorte[0].ort, data.arbeitsorte[0].plz].filter(Boolean).join(' ') : null,\n    data.arbeitszeitmodelle ? 'Arbeitszeit: ' + [].concat(data.arbeitszeitmodelle).join(', ') : null,\n    data.befristung ? 'Befristung: ' + data.befristung : null].filter(Boolean).join('\\n');\n  out.push({ json: { title: data.titel || j.title, employer: data.arbeitgeber || j.employer, place: j.place,\n    url: j.external_url || j.url, source: j.source, text: [extra, text].filter(Boolean).join('\\n\\n'), ext_id: j.ext_id, kw: j.kw } });\n}\nout[0].json._ba = jobs[0].json._ba;\nreturn out;\n"
+      },
+      "id": "a8152060-2319-4f84-9acd-521a9d7da749",
       "name": "BA: Normalisieren",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1940,
-        100
+        2528,
+        1632
       ],
-      "parameters": {
-        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote--' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\nconst jobs = $('BA: Treffer sammeln').all();\nif (jobs.length === 1 && jobs[0].json.nothing) return [{ json: { nothing: true, _ba: jobs[0].json._ba } }];\nconst det = $input.all();\nconst out = [];\nfor (let i = 0; i < jobs.length; i++) {\n  const j = jobs[i].json; const d = (det[i] && det[i].json) || {};\n  let data = {}, text = '';\n  const raw = typeof d.data === 'string' ? d.data : (typeof d.body === 'string' ? d.body : '');\n  if (d.statusCode === 200 && raw) {\n    if (/^\\s*[{\\[]/.test(raw)) {\n      try { data = JSON.parse(raw); } catch (e) { data = {}; }\n      text = htmlToText(data.stellenangebotsBeschreibung || data.stellenbeschreibung || '');\n    } else {\n      // Öffentliche Detailseite: Hauptinhalt als Text\n      const m = raw.match(/<main[\\s\\S]*?<\\/main>/i) || raw.match(/<body[\\s\\S]*?<\\/body>/i);\n      text = htmlToText(m ? m[0] : raw)\n        .split('\\n').filter(l => !/^(Bitte anmelden|Merken|Teilen|Drucken|Zurück|Cookie|Sicherheitsabfrage|Zur Jobsuche|Startseite|Info zur Bewerbung|Vormerken|Notiz|Status Notiz|Bewerbungsstatus|PDF|Veröffentlichungsdatum)/i.test(l.trim())).join('\\n');\n    }\n  }\n  const extra = [j.facts || null, data.arbeitgeber ? 'Arbeitgeber: ' + data.arbeitgeber : null,\n    data.arbeitsorte && data.arbeitsorte[0] ? 'Arbeitsort: ' + [data.arbeitsorte[0].ort, data.arbeitsorte[0].plz].filter(Boolean).join(' ') : null,\n    data.arbeitszeitmodelle ? 'Arbeitszeit: ' + [].concat(data.arbeitszeitmodelle).join(', ') : null,\n    data.befristung ? 'Befristung: ' + data.befristung : null].filter(Boolean).join('\\n');\n  out.push({ json: { title: data.titel || j.title, employer: data.arbeitgeber || j.employer, place: j.place,\n    url: j.external_url || j.url, source: j.source, text: [extra, text].filter(Boolean).join('\\n\\n'), ext_id: j.ext_id, kw: j.kw } });\n}\nout[0].json._ba = jobs[0].json._ba;\nreturn out;\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Bringt die BA-Stellen samt Anzeigentext in das gemeinsame Format."
     },
     {
-      "id": "js-gmail",
-      "name": "Gmail: Alerts lesen",
-      "type": "n8n-nodes-base.gmail",
-      "typeVersion": 2.1,
-      "position": [
-        980,
-        400
-      ],
-      "alwaysOutputData": true,
-      "onError": "continueRegularOutput",
       "parameters": {
         "operation": "getAll",
         "returnAll": true,
@@ -253,54 +269,45 @@
         },
         "options": {}
       },
+      "id": "4ab4a0df-3ca2-4e66-94f9-53a5c8c673e2",
+      "name": "Gmail: Alerts lesen",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1568,
+        1936
+      ],
+      "alwaysOutputData": true,
+      "webhookId": "462b01b8-876b-4b67-9760-60757beef0b8",
       "credentials": {
         "gmailOAuth2": {
+          "id": "TDVM6zG3D4VAtQTS",
           "name": "Gmail Jobsuche"
         }
-      }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Liest die Job-Alert-Mails mit dem Gmail-Label aus den letzten Tagen."
     },
     {
-      "id": "js-gm-l",
+      "parameters": {
+        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote----' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\n// Job-Links aus Alert-Mails. LinkedIn: direkte /jobs/view/<id>-Links. StepStone/Indeed: Tracking-Redirects\n// (click.stepstone.de ...), die beim Laden der Seite automatisch auf die Anzeige weiterleiten.\nconst known = $('Quellen vorbereiten').first().json;\nconst knownUrls = new Set(known.known_urls), knownKeys = new Set(known.known_keys);\nconst HOSTS = [\n  { re: /linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/\\d+/i, source: 'LinkedIn / XING' },\n  { re: /xing\\.com\\/(?:m\\/)?jobs\\//i, source: 'LinkedIn / XING' },\n  { re: /stepstone\\.(?:de|com)\\/(?:stellenangebote|jobs)/i, source: 'Indeed / StepStone' },\n  { re: /click\\.stepstone\\.de\\//i, source: 'Indeed / StepStone', redirect: true },\n  { re: /indeed\\.[a-z.]+\\/(?:viewjob|rc\\/clk|pagead|jobs)/i, source: 'Indeed / StepStone' },\n  { re: /(?:cts|engage|click)\\.indeed\\.[a-z.]+\\//i, source: 'Indeed / StepStone', redirect: true },\n];\n// Linktexte, die keine Stellentitel sind\nconst NOT_TITLE = /^(ich\\s*bin\\s*interessiert|jetzt bewerben|bewerben|ansehen|job ansehen|view|see all jobs|alle jobs|mehr|hier|lebenslauf|diesen job melden|e-mail-einstellungen|diese e-mail|abbestellen|abmelden|unsubscribe|nutzungsbedingungen|datenschutz|kontakt|impressum|hilfe|help|manage|try premium|install|learn why|your job alert|weil du|job-alarm|jobagent)/i;\nconst seen = new Set(); const out = []; let mails = 0, found = 0, titleDrop = 0;\nfor (const it of $input.all()) {\n  const j = it.json || {}; if (!j.id && !j.html && !j.text) continue; mails++;\n  const html = String(j.html || j.textHtml || j.textAsHtml || j.text || '');\n  const re = /<a\\b[^>]*href=[\"']([^\"']+)[\"'][^>]*>([\\s\\S]*?)<\\/a>/gi;\n  let m;\n  while ((m = re.exec(html))) {\n    const href = m[1].replace(/&amp;/g, '&');\n    const h = HOSTS.find(x => x.re.test(href)); if (!h) continue;\n    const label = htmlToText(m[2]).replace(/\\s+/g, ' ').trim();\n    if (!label || label.length < 6 || NOT_TITLE.test(label)) continue;\n    const url = h.redirect ? href : canonUrl(href);\n    const key = h.redirect ? normKey(label) : url;\n    if (!url || seen.has(key) || knownUrls.has(url)) continue;\n    // Arbeitgeber und Ort stehen direkt nach dem Link (LinkedIn: \"Firma · Ort (Modus)\", StepStone: \"Firma|Ort|Größe\")\n    const after = html.slice(re.lastIndex, re.lastIndex + 1500).replace(/<[^>]+>/g, '|')\n      .replace(/&nbsp;|&#160;/gi, ' ').replace(/&middot;|&#183;/gi, '·').replace(/&amp;/g, '&').replace(/[\\u00a0\\u034f\\u2060\\u200b-\\u200d]/g, ' ');\n    const parts = after.split('|').map(x => x.replace(/\\s+/g, ' ').trim()).filter(x => x && x.length > 1).slice(0, 3);\n    let employer = '', place = '';\n    if (parts[0] && parts[0].includes('·')) { const p = parts[0].split('·'); employer = p[0].trim(); place = (p[1] || '').trim(); }\n    else { employer = parts[0] || ''; place = parts[1] || ''; }\n    if (NOT_TITLE.test(employer) || employer.length > 80) employer = '';\n    if (knownKeys.has(normKey(label + ' ' + employer))) continue;\n    seen.add(key); found++;\n    if (!titleOk(label)) { titleDrop++; continue; }   // v1.4: Titel-Vorfilter schon hier, damit nur passende Seiten geladen werden\n    out.push({ json: { title: label.replace(/\\s*…$|\\.\\.\\.$/, '').slice(0, 160), employer, place, url, source: h.source, mail_subject: j.subject || '' } });\n  }\n}\nif (!out.length) return [{ json: { nothing: true, _gmail: { mails, links: 0, found, title_dropped: titleDrop } } }];\n// v1.4: nur so viele Seiten laden, wie in das Tageslimit passen (reihum je Quelle)\nconst bySrc = {}; for (const o of out) (bySrc[o.json.source] = bySrc[o.json.source] || []).push(o);\nconst lim = []; let more = true;\nfor (let i = 0; more && lim.length < P.max_per_run; i++) { more = false; for (const k of Object.keys(bySrc)) if (bySrc[k][i] && lim.length < P.max_per_run) { lim.push(bySrc[k][i]); more = true; } }\nlim[0].json._gmail = { mails, links: lim.length, found, title_dropped: titleDrop, over_limit: out.length - lim.length };\nreturn lim;\n"
+      },
+      "id": "5121ad45-0bee-4e22-92c3-c30bb80e3dac",
       "name": "Gmail: Links extrahieren",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1220,
-        400
+        1808,
+        1936
       ],
-      "parameters": {
-        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote--' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\n// Job-Links aus Alert-Mails. LinkedIn: direkte /jobs/view/<id>-Links. StepStone/Indeed: Tracking-Redirects\n// (click.stepstone.de ...), die beim Laden der Seite automatisch auf die Anzeige weiterleiten.\nconst known = $('Quellen vorbereiten').first().json;\nconst knownUrls = new Set(known.known_urls), knownKeys = new Set(known.known_keys);\nconst HOSTS = [\n  { re: /linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/\\d+/i, source: 'LinkedIn / XING' },\n  { re: /xing\\.com\\/(?:m\\/)?jobs\\//i, source: 'LinkedIn / XING' },\n  { re: /stepstone\\.(?:de|com)\\/(?:stellenangebote|jobs)/i, source: 'Indeed / StepStone' },\n  { re: /click\\.stepstone\\.de\\//i, source: 'Indeed / StepStone', redirect: true },\n  { re: /indeed\\.[a-z.]+\\/(?:viewjob|rc\\/clk|pagead|jobs)/i, source: 'Indeed / StepStone' },\n  { re: /(?:cts|engage|click)\\.indeed\\.[a-z.]+\\//i, source: 'Indeed / StepStone', redirect: true },\n];\n// Linktexte, die keine Stellentitel sind\nconst NOT_TITLE = /^(ich\\s*bin\\s*interessiert|jetzt bewerben|bewerben|ansehen|job ansehen|view|see all jobs|alle jobs|mehr|hier|lebenslauf|diesen job melden|e-mail-einstellungen|diese e-mail|abbestellen|abmelden|unsubscribe|nutzungsbedingungen|datenschutz|kontakt|impressum|hilfe|help|manage|try premium|install|learn why|your job alert|weil du|job-alarm|jobagent)/i;\nconst seen = new Set(); const out = []; let mails = 0;\nfor (const it of $input.all()) {\n  const j = it.json || {}; if (!j.id && !j.html && !j.text) continue; mails++;\n  const html = String(j.html || j.textHtml || j.textAsHtml || j.text || '');\n  const re = /<a\\b[^>]*href=[\"']([^\"']+)[\"'][^>]*>([\\s\\S]*?)<\\/a>/gi;\n  let m;\n  while ((m = re.exec(html))) {\n    const href = m[1].replace(/&amp;/g, '&');\n    const h = HOSTS.find(x => x.re.test(href)); if (!h) continue;\n    const label = htmlToText(m[2]).replace(/\\s+/g, ' ').trim();\n    if (!label || label.length < 6 || NOT_TITLE.test(label)) continue;\n    const url = h.redirect ? href : canonUrl(href);\n    const key = h.redirect ? normKey(label) : url;\n    if (!url || seen.has(key) || knownUrls.has(url)) continue;\n    // Arbeitgeber und Ort stehen direkt nach dem Link (LinkedIn: \"Firma · Ort (Modus)\", StepStone: \"Firma|Ort|Größe\")\n    const after = html.slice(re.lastIndex, re.lastIndex + 1500).replace(/<[^>]+>/g, '|')\n      .replace(/&nbsp;|&#160;/gi, ' ').replace(/&middot;|&#183;/gi, '·').replace(/&amp;/g, '&').replace(/[\\u00a0\\u034f\\u2060\\u200b-\\u200d]/g, ' ');\n    const parts = after.split('|').map(x => x.replace(/\\s+/g, ' ').trim()).filter(x => x && x.length > 1).slice(0, 3);\n    let employer = '', place = '';\n    if (parts[0] && parts[0].includes('·')) { const p = parts[0].split('·'); employer = p[0].trim(); place = (p[1] || '').trim(); }\n    else { employer = parts[0] || ''; place = parts[1] || ''; }\n    if (NOT_TITLE.test(employer) || employer.length > 80) employer = '';\n    if (knownKeys.has(normKey(label + ' ' + employer))) continue;\n    seen.add(key);\n    out.push({ json: { title: label.replace(/\\s*…$|\\.\\.\\.$/, '').slice(0, 160), employer, place, url, source: h.source, mail_subject: j.subject || '' } });\n  }\n}\nif (!out.length) return [{ json: { nothing: true, _gmail: { mails, links: 0 } } }];\nout[0].json._gmail = { mails, links: out.length };\nreturn out;\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Zieht Stellenlinks, Titel, Firma und Ort aus den Alert-Mails und filtert nach Titel."
     },
     {
-      "id": "js-gm-f",
-      "name": "Gmail: Anzeige laden",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1460,
-        400
-      ],
-      "onError": "continueRegularOutput",
-      "alwaysOutputData": true,
       "parameters": {
-        "url": "={{ $json.nothing ? 'https://invalid.invalid' : $json.url }}",
-        "options": {
-          "timeout": 20000,
-          "batching": {
-            "batch": {
-              "batchSize": 1,
-              "batchInterval": 1200
-            }
-          },
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "neverError": true,
-              "responseFormat": "text"
-            }
-          }
-        },
+        "url": "={{ ($json.nothing || /click\\.stepstone\\.de\\//i.test($json.url || '')) ? 'https://invalid.invalid' : $json.url }}",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -313,32 +320,54 @@
               "value": "de-DE,de;q=0.9"
             }
           ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 1200
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
         }
-      }
+      },
+      "id": "abff042b-d19b-484e-bc1b-c447935ee4db",
+      "name": "Gmail: Anzeige laden",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2528,
+        1936
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Lädt die Anzeigenseite zu jedem Link aus den Alert-Mails."
     },
     {
-      "id": "js-gm-n",
+      "parameters": {
+        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote----' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\nconst links = $('StepStone: saubere Adresse').all();\nif (links.length === 1 && links[0].json.nothing) return [{ json: { nothing: true, _gmail: links[0].json._gmail } }];\nconst pages = $input.all(); const out = [];\n// v1.4: Seiten ohne Anzeige (Login, Cookie-Wand, Sperre, Anzeige offline) liefern KEINEN Text -> Vorprüfung statt Scorer\nconst BLOCKED = /sign in|anmelden, um fortzufahren|join linkedin|authwall|zugriff verweigert|access denied|captcha|just a moment|we need more cookies|wir brauchen (mehr )?cookies|cookies aktivieren|enable cookies|nicht mehr verfügbar|no longer available|anzeige ist abgelaufen/i;\nfor (let i = 0; i < links.length; i++) {\n  const l = links[i].json; const p = (pages[i] && pages[i].json) || {};\n  const status = p.statusCode || 0;\n  const html = typeof p.data === 'string' ? p.data : (typeof p.body === 'string' ? p.body : '');\n  let title = l.title, employer = l.employer, text = '', place = l.place || '', finalUrl = l.url;\n  const og = (typeof p.data === 'string' ? p.data : '').match(/property=[\"']og:url[\"'][^>]*content=[\"']([^\"']+)[\"']/i);\n  if (og) finalUrl = og[1];\n  if (status === 200 && html) {\n    const ld = html.match(/<script[^>]*type=[\"']application\\/ld\\+json[\"'][^>]*>([\\s\\S]*?)<\\/script>/gi) || [];\n    for (const s of ld) {\n      try {\n        const o = JSON.parse(s.replace(/^<script[^>]*>/i, '').replace(/<\\/script>$/i, ''));\n        const arr = Array.isArray(o) ? o : [o];\n        const jp = arr.find(x => x && (x['@type'] === 'JobPosting' || (Array.isArray(x['@type']) && x['@type'].includes('JobPosting'))));\n        if (jp) {\n          title = jp.title || title;\n          if (jp.url && /^https?:/.test(jp.url)) finalUrl = jp.url;\n          employer = (jp.hiringOrganization && jp.hiringOrganization.name) || employer;\n          const loc = jp.jobLocation && (Array.isArray(jp.jobLocation) ? jp.jobLocation[0] : jp.jobLocation);\n          place = (loc && loc.address && (loc.address.addressLocality || loc.address.addressRegion)) || '';\n          text = htmlToText(jp.description || '');\n          break;\n        }\n      } catch (e) {}\n    }\n    if (!text) {\n      const og = html.match(/property=[\"']og:title[\"'][^>]*content=[\"']([^\"']+)[\"']/i) || html.match(/<title[^>]*>([^<]+)<\\/title>/i);\n      if (og && (!title || title.length < 10)) title = htmlToText(og[1]).slice(0, 160);\n      const body = html.match(/<main[\\s\\S]*?<\\/main>/i) || html.match(/<article[\\s\\S]*?<\\/article>/i) || html.match(/<body[\\s\\S]*?<\\/body>/i);\n      text = htmlToText(body ? body[0] : html);\n      if (BLOCKED.test(text.slice(0, 2000))) text = '';\n    }\n  }\n  if (!titleOk(title)) continue;\n  if (/click\\.stepstone\\.de\\//i.test(finalUrl)) continue;   // Mail-Link nie speichern\n  out.push({ json: { title, employer, place, url: finalUrl, source: l.source, text, fetch_status: status, ext_id: finalUrl } });\n}\nif (!out.length) return [{ json: { nothing: true, _gmail: links[0].json._gmail } }];\nout[0].json._gmail = links[0].json._gmail;\nreturn out;\n"
+      },
+      "id": "9feaff39-e3be-43bb-ad53-001296d11f1d",
       "name": "Gmail: Normalisieren",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1700,
-        400
+        2768,
+        1936
       ],
-      "parameters": {
-        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote--' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\nconst links = $('Gmail: Links extrahieren').all();\nif (links.length === 1 && links[0].json.nothing) return [{ json: { nothing: true, _gmail: links[0].json._gmail } }];\nconst pages = $input.all(); const out = [];\nfor (let i = 0; i < links.length; i++) {\n  const l = links[i].json; const p = (pages[i] && pages[i].json) || {};\n  const status = p.statusCode || 0;\n  const html = typeof p.data === 'string' ? p.data : (typeof p.body === 'string' ? p.body : '');\n  let title = l.title, employer = l.employer, text = '', place = l.place || '', finalUrl = l.url;\n  const og = (typeof p.data === 'string' ? p.data : '').match(/property=[\"']og:url[\"'][^>]*content=[\"']([^\"']+)[\"']/i);\n  if (og) finalUrl = og[1];\n  if (status === 200 && html) {\n    const ld = html.match(/<script[^>]*type=[\"']application\\/ld\\+json[\"'][^>]*>([\\s\\S]*?)<\\/script>/gi) || [];\n    for (const s of ld) {\n      try {\n        const o = JSON.parse(s.replace(/^<script[^>]*>/i, '').replace(/<\\/script>$/i, ''));\n        const arr = Array.isArray(o) ? o : [o];\n        const jp = arr.find(x => x && (x['@type'] === 'JobPosting' || (Array.isArray(x['@type']) && x['@type'].includes('JobPosting'))));\n        if (jp) {\n          title = jp.title || title;\n          if (jp.url && /^https?:/.test(jp.url)) finalUrl = jp.url;\n          employer = (jp.hiringOrganization && jp.hiringOrganization.name) || employer;\n          const loc = jp.jobLocation && (Array.isArray(jp.jobLocation) ? jp.jobLocation[0] : jp.jobLocation);\n          place = (loc && loc.address && (loc.address.addressLocality || loc.address.addressRegion)) || '';\n          text = htmlToText(jp.description || '');\n          break;\n        }\n      } catch (e) {}\n    }\n    if (!text) {\n      const og = html.match(/property=[\"']og:title[\"'][^>]*content=[\"']([^\"']+)[\"']/i) || html.match(/<title[^>]*>([^<]+)<\\/title>/i);\n      if (og && (!title || title.length < 10)) title = htmlToText(og[1]).slice(0, 160);\n      const body = html.match(/<main[\\s\\S]*?<\\/main>/i) || html.match(/<article[\\s\\S]*?<\\/article>/i) || html.match(/<body[\\s\\S]*?<\\/body>/i);\n      text = htmlToText(body ? body[0] : html);\n      if (/sign in|anmelden, um fortzufahren|join linkedin|authwall|zugriff verweigert|captcha|just a moment/i.test(text.slice(0, 2000))) text = '';\n    }\n  }\n  if (!titleOk(title)) continue;\n  out.push({ json: { title, employer, place, url: finalUrl, source: l.source, text, fetch_status: status, ext_id: finalUrl } });\n}\nif (!out.length) return [{ json: { nothing: true, _gmail: links[0].json._gmail } }];\nout[0].json._gmail = links[0].json._gmail;\nreturn out;\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Liest Titel, Firma, Ort und Anzeigentext aus der Seite, Login- und Cookie-Seiten gelten als ohne Text."
     },
     {
-      "id": "js-wl",
-      "name": "Wunschliste lesen",
-      "type": "n8n-nodes-base.airtable",
-      "typeVersion": 2.1,
-      "position": [
-        980,
-        700
-      ],
-      "alwaysOutputData": true,
       "parameters": {
         "operation": "search",
         "base": {
@@ -351,58 +380,49 @@
           "value": "YOUR_WISHLIST_TABLE_ID",
           "mode": "id"
         },
-        "returnAll": true,
-        "options": {},
-        "filterByFormula": "{Link zur Karriereseite}"
+        "filterByFormula": "{Link zur Karriereseite}",
+        "options": {}
       },
+      "id": "67f298c1-3fd6-44de-93e6-ebf4e792d59b",
+      "name": "Wunschliste lesen",
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        1568,
+        2224
+      ],
+      "alwaysOutputData": true,
       "credentials": {
         "airtableTokenApi": {
+          "id": "UsXzqEWX18Q293Vh",
           "name": "Airtable Jobsuche"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notes": "Liest die Arbeitgeber der Wunschliste mit Link zur Karriereseite aus Airtable."
     },
     {
-      "id": "js-wl-u",
+      "parameters": {
+        "jsCode": "\n// Karriereseiten der Wunschliste -> API-URLs bekannter ATS (ohne KI). Unbekannte Systeme werden nur gezählt.\nconst out = []; let withLink = 0; const manual = [];\nconst host = u => { const m = String(u || '').match(/^https?:\\/\\/([^\\/?#]+)/i); return m ? m[1].toLowerCase().replace(/^www\\./, '') : ''; };\nfor (const it of $input.all()) {\n  const f = (it.json && it.json.fields) || it.json || {};\n  const name = f['Name des Arbeitgebers'] || ''; const url = f['Link zur Karriereseite'] || '';\n  if (!url) continue; withLink++;\n  const h = host(url); const path = String(url).replace(/^https?:\\/\\/[^\\/]+/, '');\n  let api = null, ats = null;\n  let m;\n  if ((m = h.match(/^([a-z0-9-]+)\\.jobs\\.personio\\.(?:de|com)$/))) { ats = 'personio'; api = `https://${m[1]}.jobs.personio.de/xml`; }\n  else if (/personio/.test(h)) { ats = 'personio'; api = `https://${h}/xml`; }\n  else if ((m = String(url).match(/greenhouse\\.io\\/([a-z0-9_-]+)/i)) && !/api/.test(h)) { ats = 'greenhouse'; api = `https://boards-api.greenhouse.io/v1/boards/${m[1]}/jobs?content=true`; }\n  else if ((m = String(url).match(/lever\\.co\\/([a-z0-9_-]+)/i))) { ats = 'lever'; api = `https://api.lever.co/v0/postings/${m[1]}?mode=json`; }\n  else if ((m = h.match(/^([a-z0-9-]+)\\.recruitee\\.com$/))) { ats = 'recruitee'; api = `https://${m[1]}.recruitee.com/api/offers/`; }\n  else if ((m = String(url).match(/ashbyhq\\.com\\/([a-z0-9_-]+)/i))) { ats = 'ashby'; api = `https://api.ashbyhq.com/posting-api/job-board/${m[1]}?includeCompensation=false`; }\n  else if ((m = String(url).match(/smartrecruiters\\.com\\/([A-Za-z0-9_-]+)/))) { ats = 'smartrecruiters'; api = `https://api.smartrecruiters.com/v1/companies/${m[1]}/postings?limit=100`; }\n  else if ((m = String(url).match(/apply\\.workable\\.com\\/([a-z0-9_-]+)/i))) { ats = 'workable'; api = `https://apply.workable.com/api/v1/widget/accounts/${m[1]}`; }\n  if (api) out.push({ json: { employer: name, careers_url: url, ats, api_url: api } });\n  else manual.push(name);\n}\nif (!out.length) return [{ json: { nothing: true, _wl: { withLink, ats: 0, manual } } }];\nout[0].json._wl = { withLink, ats: out.length, manual };\nreturn out;\n"
+      },
+      "id": "45a421ea-31cc-4602-a1b7-9f3e60957216",
       "name": "Karriereseiten: API-URLs",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1220,
-        700
+        1808,
+        2224
       ],
-      "parameters": {
-        "jsCode": "\n// Karriereseiten der Wunschliste -> API-URLs bekannter ATS (ohne KI). Unbekannte Systeme werden nur gezählt.\nconst out = []; let withLink = 0; const manual = [];\nconst host = u => { const m = String(u || '').match(/^https?:\\/\\/([^\\/?#]+)/i); return m ? m[1].toLowerCase().replace(/^www\\./, '') : ''; };\nfor (const it of $input.all()) {\n  const f = (it.json && it.json.fields) || it.json || {};\n  const name = f['Name des Arbeitgebers'] || ''; const url = f['Link zur Karriereseite'] || '';\n  if (!url) continue; withLink++;\n  const h = host(url); const path = String(url).replace(/^https?:\\/\\/[^\\/]+/, '');\n  let api = null, ats = null;\n  let m;\n  if ((m = h.match(/^([a-z0-9-]+)\\.jobs\\.personio\\.(?:de|com)$/))) { ats = 'personio'; api = `https://${m[1]}.jobs.personio.de/xml`; }\n  else if (/personio/.test(h)) { ats = 'personio'; api = `https://${h}/xml`; }\n  else if ((m = String(url).match(/greenhouse\\.io\\/([a-z0-9_-]+)/i)) && !/api/.test(h)) { ats = 'greenhouse'; api = `https://boards-api.greenhouse.io/v1/boards/${m[1]}/jobs?content=true`; }\n  else if ((m = String(url).match(/lever\\.co\\/([a-z0-9_-]+)/i))) { ats = 'lever'; api = `https://api.lever.co/v0/postings/${m[1]}?mode=json`; }\n  else if ((m = h.match(/^([a-z0-9-]+)\\.recruitee\\.com$/))) { ats = 'recruitee'; api = `https://${m[1]}.recruitee.com/api/offers/`; }\n  else if ((m = String(url).match(/ashbyhq\\.com\\/([a-z0-9_-]+)/i))) { ats = 'ashby'; api = `https://api.ashbyhq.com/posting-api/job-board/${m[1]}?includeCompensation=false`; }\n  else if ((m = String(url).match(/smartrecruiters\\.com\\/([A-Za-z0-9_-]+)/))) { ats = 'smartrecruiters'; api = `https://api.smartrecruiters.com/v1/companies/${m[1]}/postings?limit=100`; }\n  else if ((m = String(url).match(/apply\\.workable\\.com\\/([a-z0-9_-]+)/i))) { ats = 'workable'; api = `https://apply.workable.com/api/v1/widget/accounts/${m[1]}`; }\n  if (api) out.push({ json: { employer: name, careers_url: url, ats, api_url: api } });\n  else manual.push(name);\n}\nif (!out.length) return [{ json: { nothing: true, _wl: { withLink, ats: 0, manual } } }];\nout[0].json._wl = { withLink, ats: out.length, manual };\nreturn out;\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Erkennt das Bewerbersystem der Karriereseite (Personio, Greenhouse usw.) und baut dessen API-Adresse."
     },
     {
-      "id": "js-wl-f",
-      "name": "Karriereseiten: Laden",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        1460,
-        700
-      ],
-      "onError": "continueRegularOutput",
-      "alwaysOutputData": true,
       "parameters": {
         "url": "={{ $json.nothing ? 'https://invalid.invalid' : $json.api_url }}",
-        "options": {
-          "timeout": 20000,
-          "batching": {
-            "batch": {
-              "batchSize": 2,
-              "batchInterval": 600
-            }
-          },
-          "response": {
-            "response": {
-              "fullResponse": true,
-              "neverError": true,
-              "responseFormat": "text"
-            }
-          }
-        },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -415,71 +435,99 @@
               "value": "application/json, application/xml, text/xml, */*"
             }
           ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 2,
+              "batchInterval": 600
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 20000
         }
-      }
+      },
+      "id": "d0ad7005-cf05-4dc8-8c67-0cab3145f1b0",
+      "name": "Karriereseiten: Laden",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2048,
+        2224
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Lädt die Stellenliste jeder erkannten Karriereseite."
     },
     {
-      "id": "js-wl-n",
+      "parameters": {
+        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote----' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\nconst src = $('Karriereseiten: API-URLs').all();\nif (src.length === 1 && src[0].json.nothing) return [{ json: { nothing: true, _wl: src[0].json._wl } }];\nconst known = $('Quellen vorbereiten').first().json;\nconst knownUrls = new Set(known.known_urls), knownKeys = new Set(known.known_keys);\nconst res = $input.all(); const out = []; const failed = [];\nconst parse = s => { try { return JSON.parse(s); } catch (e) { return null; } };\nconst xmlTag = (block, tag) => { const m = block.match(new RegExp('<' + tag + '[^>]*>([\\\\s\\\\S]*?)<\\\\/' + tag + '>', 'i')); return m ? m[1].replace(/^\\s*<!\\[CDATA\\[|\\]\\]>\\s*$/g, '').trim() : ''; };\nfor (let i = 0; i < src.length; i++) {\n  const s = src[i].json; const r = (res[i] && res[i].json) || {};\n  const status = r.statusCode || 0; const body = typeof r.data === 'string' ? r.data : (typeof r.body === 'string' ? r.body : '');\n  if (status !== 200 || !body) { failed.push(`${s.employer} (${s.ats}: ${status || 'keine Antwort'})`); continue; }\n  const jobs = [];\n  if (s.ats === 'personio') {\n    for (const blk of body.match(/<position>[\\s\\S]*?<\\/position>/gi) || []) {\n      const id = xmlTag(blk, 'id');\n      jobs.push({ title: xmlTag(blk, 'name'), place: xmlTag(blk, 'office'), url: s.careers_url.replace(/\\/?$/, '') + '/job/' + id,\n        text: htmlToText((blk.match(/<jobDescription>[\\s\\S]*?<\\/jobDescription>/gi) || []).map(x => xmlTag(x, 'name') + '\\n' + xmlTag(x, 'value')).join('\\n\\n')) });\n    }\n  } else if (s.ats === 'greenhouse') {\n    for (const j of (parse(body) || {}).jobs || []) jobs.push({ title: j.title, place: (j.location && j.location.name) || '', url: j.absolute_url, text: htmlToText(j.content || '') });\n  } else if (s.ats === 'lever') {\n    for (const j of parse(body) || []) jobs.push({ title: j.text, place: (j.categories && j.categories.location) || '', url: j.hostedUrl, text: j.descriptionPlain || htmlToText(j.description || '') });\n  } else if (s.ats === 'recruitee') {\n    for (const j of (parse(body) || {}).offers || []) jobs.push({ title: j.title, place: [j.city, j.country].filter(Boolean).join(', ') + (j.remote ? ' Remote' : ''), url: j.careers_url, text: htmlToText((j.description || '') + '\\n' + (j.requirements || '')) });\n  } else if (s.ats === 'ashby') {\n    for (const j of (parse(body) || {}).jobs || []) jobs.push({ title: j.title, place: (j.location || '') + (j.isRemote ? ' Remote' : ''), url: j.jobUrl, text: j.descriptionPlain || htmlToText(j.descriptionHtml || '') });\n  } else if (s.ats === 'smartrecruiters') {\n    for (const j of (parse(body) || {}).content || []) jobs.push({ title: j.name, place: (j.location && j.location.city) || '', url: `https://jobs.smartrecruiters.com/${j.company && j.company.identifier || ''}/${j.id}`, text: '' });\n  } else if (s.ats === 'workable') {\n    for (const j of (parse(body) || {}).jobs || []) jobs.push({ title: j.title, place: [j.city, j.country].filter(Boolean).join(', ') + (j.remote ? ' Remote' : ''), url: j.url, text: htmlToText(j.description || '') });\n  }\n  for (const j of jobs) {\n    if (!j.title || !j.url) continue;\n    if (!titleOk(j.title)) continue;   // Ort entscheidet der Scorer\n    const cu = canonUrl(j.url);\n    if (knownUrls.has(cu) || knownKeys.has(normKey(j.title + ' ' + s.employer))) continue;\n    out.push({ json: { title: j.title, employer: s.employer, place: j.place, url: j.url, source: 'Karriereseite Wunschliste', text: j.text || '', ext_id: cu } });\n  }\n}\nconst meta = { ...src[0].json._wl, failed, found: out.length };\nif (!out.length) return [{ json: { nothing: true, _wl: meta } }];\nout[0].json._wl = meta;\nreturn out;\n"
+      },
+      "id": "1bb49e18-1c8a-45eb-a9c7-ab79748714c9",
       "name": "Karriereseiten: Normalisieren",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1700,
-        700
+        2288,
+        2224
       ],
-      "parameters": {
-        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote--' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\nconst src = $('Karriereseiten: API-URLs').all();\nif (src.length === 1 && src[0].json.nothing) return [{ json: { nothing: true, _wl: src[0].json._wl } }];\nconst known = $('Quellen vorbereiten').first().json;\nconst knownUrls = new Set(known.known_urls), knownKeys = new Set(known.known_keys);\nconst res = $input.all(); const out = []; const failed = [];\nconst parse = s => { try { return JSON.parse(s); } catch (e) { return null; } };\nconst xmlTag = (block, tag) => { const m = block.match(new RegExp('<' + tag + '[^>]*>([\\\\s\\\\S]*?)<\\\\/' + tag + '>', 'i')); return m ? m[1].replace(/^\\s*<!\\[CDATA\\[|\\]\\]>\\s*$/g, '').trim() : ''; };\nfor (let i = 0; i < src.length; i++) {\n  const s = src[i].json; const r = (res[i] && res[i].json) || {};\n  const status = r.statusCode || 0; const body = typeof r.data === 'string' ? r.data : (typeof r.body === 'string' ? r.body : '');\n  if (status !== 200 || !body) { failed.push(`${s.employer} (${s.ats}: ${status || 'keine Antwort'})`); continue; }\n  const jobs = [];\n  if (s.ats === 'personio') {\n    for (const blk of body.match(/<position>[\\s\\S]*?<\\/position>/gi) || []) {\n      const id = xmlTag(blk, 'id');\n      jobs.push({ title: xmlTag(blk, 'name'), place: xmlTag(blk, 'office'), url: s.careers_url.replace(/\\/?$/, '') + '/job/' + id,\n        text: htmlToText((blk.match(/<jobDescription>[\\s\\S]*?<\\/jobDescription>/gi) || []).map(x => xmlTag(x, 'name') + '\\n' + xmlTag(x, 'value')).join('\\n\\n')) });\n    }\n  } else if (s.ats === 'greenhouse') {\n    for (const j of (parse(body) || {}).jobs || []) jobs.push({ title: j.title, place: (j.location && j.location.name) || '', url: j.absolute_url, text: htmlToText(j.content || '') });\n  } else if (s.ats === 'lever') {\n    for (const j of parse(body) || []) jobs.push({ title: j.text, place: (j.categories && j.categories.location) || '', url: j.hostedUrl, text: j.descriptionPlain || htmlToText(j.description || '') });\n  } else if (s.ats === 'recruitee') {\n    for (const j of (parse(body) || {}).offers || []) jobs.push({ title: j.title, place: [j.city, j.country].filter(Boolean).join(', ') + (j.remote ? ' Remote' : ''), url: j.careers_url, text: htmlToText((j.description || '') + '\\n' + (j.requirements || '')) });\n  } else if (s.ats === 'ashby') {\n    for (const j of (parse(body) || {}).jobs || []) jobs.push({ title: j.title, place: (j.location || '') + (j.isRemote ? ' Remote' : ''), url: j.jobUrl, text: j.descriptionPlain || htmlToText(j.descriptionHtml || '') });\n  } else if (s.ats === 'smartrecruiters') {\n    for (const j of (parse(body) || {}).content || []) jobs.push({ title: j.name, place: (j.location && j.location.city) || '', url: `https://jobs.smartrecruiters.com/${j.company && j.company.identifier || ''}/${j.id}`, text: '' });\n  } else if (s.ats === 'workable') {\n    for (const j of (parse(body) || {}).jobs || []) jobs.push({ title: j.title, place: [j.city, j.country].filter(Boolean).join(', ') + (j.remote ? ' Remote' : ''), url: j.url, text: htmlToText(j.description || '') });\n  }\n  for (const j of jobs) {\n    if (!j.title || !j.url) continue;\n    if (!titleOk(j.title)) continue;   // Ort entscheidet der Scorer\n    const cu = canonUrl(j.url);\n    if (knownUrls.has(cu) || knownKeys.has(normKey(j.title + ' ' + s.employer))) continue;\n    out.push({ json: { title: j.title, employer: s.employer, place: j.place, url: j.url, source: 'Karriereseite Wunschliste', text: j.text || '', ext_id: cu } });\n  }\n}\nconst meta = { ...src[0].json._wl, failed, found: out.length };\nif (!out.length) return [{ json: { nothing: true, _wl: meta } }];\nout[0].json._wl = meta;\nreturn out;\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Bringt die Stellen der Karriereseiten in das gemeinsame Format und filtert nach Titel."
     },
     {
-      "id": "js-merge",
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "3b80517c-a1d9-459d-a721-da0ca1165076",
       "name": "Zusammenführen",
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3,
       "position": [
-        2200,
-        400
+        3264,
+        1936
       ],
-      "parameters": {
-        "numberInputs": 3
-      }
+      "notes": "Führt die Stellen aus Bundesagentur, Gmail-Alerts und Karriereseiten zusammen."
     },
     {
-      "id": "js-filter",
+      "parameters": {
+        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote----' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\n// Alle Quellen zusammen: entdoppeln, Obergrenze, Textlänge prüfen.\nconst known = $('Quellen vorbereiten').first().json;\nconst knownUrls = new Set(known.known_urls), knownKeys = new Set(known.known_keys);\nconst meta = { ba: null, gmail: null, wl: null, known: known.known_count };\nconst seen = new Set(); const out = []; let dropped = 0;\nfor (const it of $input.all()) {\n  const j = it.json || {};\n  if (j._ba) meta.ba = j._ba; if (j._gmail) meta.gmail = j._gmail; if (j._wl) meta.wl = j._wl;\n  if (j.nothing || !j.title || !j.url) continue;\n  const cu = canonUrl(j.url); const key = normKey(j.title + ' ' + (j.employer || ''));\n  if (seen.has(cu) || seen.has(key) || knownUrls.has(cu) || knownKeys.has(key)) { dropped++; continue; }\n  seen.add(cu); seen.add(key);\n  const text = String(j.text || '').trim();\n  out.push({ json: { title: j.title, employer: j.employer || '', place: j.place || '', url: j.url, source: j.source,\n    text, text_ok: text.length >= P.min_text, _kw: j.kw || '' } });\n}\n// Reihenfolge: zuerst ALLE Stellen aus Gmail-Alerts und Wunschliste (bereits vorgefiltert, reihum je Quelle),\n// danach die BA-Suchbegriffe reihum, deren Start sich täglich verschiebt.\nconst BA = 'Bundesagentur für Arbeit';\nconst groups = {}; for (const o of out) { const g = o.json.source + '|' + (o.json._kw || ''); (groups[g] = groups[g] || []).push(o); }\n// Kreis-Start täglich verschieben: an jedem Tag steht ein anderer Suchbegriff vorn,\n// innerhalb von 30 Tagen war jeder Begriff einmal Erster (gleiche Rechnung in \"Neue Stellen filtern\").\nconst dayNo = Math.floor(Date.now() / 86400000);\nconst kwAll = P.ba_keywords;\nconst shift = kwAll.length ? dayNo % kwAll.length : 0;\nconst kwOrder = kwAll.slice(shift).concat(kwAll.slice(0, shift));\nconst gAll = Object.keys(groups);\nconst gOther = gAll.filter(g => !g.startsWith(BA + '|'));\nconst gBa = kwOrder.map(k => BA + '|' + k).filter(g => groups[g]).concat(gAll.filter(g => g.startsWith(BA + '|') && !kwOrder.includes(g.slice(BA.length + 1))));\nconst roundRobin = keys => { const res = []; let more = true;\n  for (let i = 0; more; i++) { more = false; for (const k of keys) if (groups[k][i]) { res.push(groups[k][i]); more = true; } }\n  return res; };\n// v1.5: Alerts und Wunschliste zuerst, aber BA_RESERVE Plätze bleiben für die Bundesagentur frei (11.11.: Gmail nahm alle 25).\nconst rrOther = roundRobin(gOther), rrBa = roundRobin(gBa);\nconst reserveBa = Math.min(P.ba_reserve || 0, rrBa.length);\nconst takeOther = rrOther.slice(0, Math.max(0, P.max_per_run - reserveBa));\nconst takeBa = rrBa.slice(0, P.max_per_run - takeOther.length);\nlet capped = takeOther.concat(takeBa);\nif (capped.length < P.max_per_run) capped = capped.concat(rrOther.slice(takeOther.length, takeOther.length + P.max_per_run - capped.length));\nconst summary = { ...meta, candidates: out.length, dropped_duplicates: dropped, processed: capped.length, skipped_over_cap: out.length - capped.length, ba_start_kw: kwOrder[0] || null, from_ba: capped.filter(o => o.json.source === BA).length };\nif (!capped.length) return [{ json: { nothing: true, _summary: summary } }];\ncapped[0].json._summary = summary;\nreturn capped;\n"
+      },
+      "id": "746f2d72-4725-4c93-9970-cc3613b882b0",
       "name": "Neue Stellen filtern",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2440,
-        400
+        3472,
+        1936
       ],
-      "parameters": {
-        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote--' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\n// Alle Quellen zusammen: entdoppeln, Obergrenze, Textlänge prüfen.\nconst known = $('Quellen vorbereiten').first().json;\nconst knownUrls = new Set(known.known_urls), knownKeys = new Set(known.known_keys);\nconst meta = { ba: null, gmail: null, wl: null, known: known.known_count };\nconst seen = new Set(); const out = []; let dropped = 0;\nfor (const it of $input.all()) {\n  const j = it.json || {};\n  if (j._ba) meta.ba = j._ba; if (j._gmail) meta.gmail = j._gmail; if (j._wl) meta.wl = j._wl;\n  if (j.nothing || !j.title || !j.url) continue;\n  const cu = canonUrl(j.url); const key = normKey(j.title + ' ' + (j.employer || ''));\n  if (seen.has(cu) || seen.has(key) || knownUrls.has(cu) || knownKeys.has(key)) { dropped++; continue; }\n  seen.add(cu); seen.add(key);\n  const text = String(j.text || '').trim();\n  out.push({ json: { title: j.title, employer: j.employer || '', place: j.place || '', url: j.url, source: j.source,\n    text, text_ok: text.length >= P.min_text, _kw: j.kw || '' } });\n}\n// Reihum über Quellen (BA je Suchbegriff, LinkedIn, StepStone, Wunschliste), damit nicht nur eine Quelle die Tagesgrenze füllt\nconst groups = {}; for (const o of out) { const g = o.json.source + '|' + (o.json._kw || ''); (groups[g] = groups[g] || []).push(o); }\nconst rr = []; const gk = Object.keys(groups); let more = true;\nfor (let i = 0; more; i++) { more = false; for (const k of gk) if (groups[k][i]) { rr.push(groups[k][i]); more = true; } }\nconst capped = rr.slice(0, P.max_per_run);\nconst summary = { ...meta, candidates: out.length, dropped_duplicates: dropped, processed: capped.length, skipped_over_cap: out.length - capped.length };\nif (!capped.length) return [{ json: { nothing: true, _summary: summary } }];\ncapped[0].json._summary = summary;\nreturn capped;\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Entfernt Dubletten, ordnet die Quellen reihum und begrenzt auf das Tageslimit mit reservierten BA-Plätzen."
     },
     {
-      "id": "js-loop",
+      "parameters": {
+        "options": {}
+      },
+      "id": "d32a1dbf-238c-4120-b31e-b39d357a9318",
       "name": "Je Stelle",
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        2760,
-        400
+        3824,
+        2000
       ],
-      "parameters": {
-        "batchSize": 1,
-        "options": {}
-      }
+      "notes": "Verarbeitet die neuen Stellen einzeln nacheinander."
     },
     {
-      "id": "js-if",
-      "name": "Text ausreichend?",
-      "type": "n8n-nodes-base.if",
-      "typeVersion": 2.2,
-      "position": [
-        2920,
-        560
-      ],
       "parameters": {
         "conditions": {
           "options": {
@@ -503,17 +551,18 @@
           "combinator": "and"
         },
         "options": {}
-      }
-    },
-    {
-      "id": "js-has",
-      "name": "Neue Stellen?",
+      },
+      "id": "e4a346bd-fa44-4b88-a668-be7361b0d91a",
+      "name": "Text ausreichend?",
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
       "position": [
-        2560,
-        400
+        3984,
+        2096
       ],
+      "notes": "Ist der Anzeigentext lang genug, geht die Stelle an den Scorer, sonst in die Vorprüfung."
+    },
+    {
       "parameters": {
         "conditions": {
           "options": {
@@ -537,66 +586,117 @@
           "combinator": "and"
         },
         "options": {}
-      }
+      },
+      "id": "31a6e3b0-b9fb-4532-ad98-39830d7216d8",
+      "name": "Neue Stellen?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3632,
+        1936
+      ],
+      "notes": "Gibt es neue Stellen, startet die Schleife, sonst geht es direkt zur Zusammenfassung."
     },
     {
-      "id": "js-sc-in",
-      "name": "Scorer-Eingabe",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        3160,
-        460
-      ],
       "parameters": {
-        "jsCode": "\n// Felder so benennen, wie der Scorer sie erwartet (gleich wie das Formular).\nconst j = $input.first().json;\nreturn [{ json: {\n  'Stellentitel': j.title, 'Arbeitgeber': j.employer, 'Link zur Stelle': j.url, 'Gefunden über': j.source, 'Anzeigentext': j.text,\n} }];\n"
-      }
+        "mode": "manual",
+        "assignments": {
+          "assignments": [
+            {
+              "id": "76426671-59be-40ea-8a1d-2b6279e33a27",
+              "name": "Stellentitel",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "0e94afb8-49ed-4f0f-adf8-aa2949545850",
+              "name": "Arbeitgeber",
+              "value": "={{ $json.employer }}",
+              "type": "string"
+            },
+            {
+              "id": "5e480283-45a5-4b20-a30a-818a500b489a",
+              "name": "Link zur Stelle",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            },
+            {
+              "id": "2816b28b-47f4-44f9-b48c-ecc9794a7e09",
+              "name": "Gefunden über",
+              "value": "={{ $json.source }}",
+              "type": "string"
+            },
+            {
+              "id": "25f01c9d-1fe2-40e9-a060-cbf5da5fe250",
+              "name": "Anzeigentext",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": false,
+        "options": {}
+      },
+      "id": "3a0cfc34-f9a1-479f-ba99-8a2968031631",
+      "name": "Scorer-Eingabe",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        4224,
+        1984
+      ],
+      "notes": "Benennt die Felder so, wie der Scorer sie erwartet (Edit Fields statt Code, braucht keinen Task-Runner)."
     },
     {
-      "id": "js-scorer",
-      "name": "Scorer aufrufen",
-      "type": "n8n-nodes-base.executeWorkflow",
-      "typeVersion": 1.2,
-      "position": [
-        3400,
-        460
-      ],
-      "onError": "continueRegularOutput",
       "parameters": {
         "workflowId": {
           "__rl": true,
+          "value": "YOUR_SCORER_WORKFLOW_ID",
           "mode": "list",
-          "value": "",
-          "cachedResultName": "Scorer v1.2 (hier auswählen)"
+          "cachedResultName": "Scorer v1.4"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
         },
         "options": {
           "waitForSubWorkflow": true
         }
-      }
+      },
+      "id": "bbbc02a2-57bf-48ab-a0da-24b2cc311d2e",
+      "name": "Scorer aufrufen",
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        4464,
+        1984
+      ],
+      "onError": "continueRegularOutput",
+      "notes": "Startet den Workflow Scorer v1.5, der die Stelle mit Gemini bewertet und in Airtable speichert."
     },
     {
-      "id": "js-vor",
+      "parameters": {
+        "jsCode": "\n// Kein ausreichender Anzeigentext: Datensatz ohne Bewertung anlegen.\nconst j = $input.first().json;\nif (j.nothing || !j.title) return [];   // leerer Lauf: keinen Datensatz anlegen\nconst today = $now.toFormat('yyyy-MM-dd');\nconst fields = {\n  fldvi9NOQkjarh6Xp: [j.title || 'Stelle ohne Titel', j.employer].filter(Boolean).join(' – '),\n  fld2I3y1rPj2PLr5G: /^https?:\\/\\//i.test(j.url) ? j.url : null,\n  fld67zsuzjVMWlHj4: j.source,\n  fldtvWymZSuRBDJYc: 'Neu',\n  fldGLAKchtHtA6nGP: today,\n  fldSB3KbrVVJhGRBh: 'Vorprüfung: Anzeigentext konnte nicht geladen werden (' + (j.text ? j.text.length + ' Zeichen' : 'leer') + '). Link öffnen, Text in das Scorer-Formular einfügen oder Stelle verwerfen.',\n  fldoRHnPAxTlxXJkQ: ['Job-Scout ' + today, j.place ? 'Ort: ' + j.place : null, j.text ? 'Textanfang: ' + j.text.slice(0, 300) : null].filter(Boolean).join('\\n'),\n};\nfor (const k of Object.keys(fields)) if (fields[k] === null) delete fields[k];\nreturn [{ json: { records: [{ fields }], typecast: true } }];\n"
+      },
+      "id": "42838e39-8145-42ed-9e34-b85d12da026e",
       "name": "Vorprüfung vorbereiten",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        3160,
-        680
+        4224,
+        2208
       ],
-      "parameters": {
-        "jsCode": "\n// Kein ausreichender Anzeigentext: Datensatz ohne Bewertung anlegen.\nconst j = $input.first().json;\nif (j.nothing || !j.title) return [];   // leerer Lauf: keinen Datensatz anlegen\nconst today = $now.toFormat('yyyy-MM-dd');\nconst fields = {\n  fldvi9NOQkjarh6Xp: [j.title || 'Stelle ohne Titel', j.employer].filter(Boolean).join(' – '),\n  fld2I3y1rPj2PLr5G: /^https?:\\/\\//i.test(j.url) ? j.url : null,\n  fld67zsuzjVMWlHj4: j.source,\n  fldtvWymZSuRBDJYc: 'Neu',\n  fldGLAKchtHtA6nGP: today,\n  fldSB3KbrVVJhGRBh: 'Vorprüfung: Anzeigentext konnte nicht geladen werden (' + (j.text ? j.text.length + ' Zeichen' : 'leer') + '). Link öffnen, Text in das Scorer-Formular einfügen oder Stelle verwerfen.',\n  fldoRHnPAxTlxXJkQ: ['Job-Scout ' + today, j.place ? 'Ort: ' + j.place : null, j.text ? 'Textanfang: ' + j.text.slice(0, 300) : null].filter(Boolean).join('\\n'),\n};\nfor (const k of Object.keys(fields)) if (fields[k] === null) delete fields[k];\nreturn [{ json: { records: [{ fields }], typecast: true } }];\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "notes": "Baut einen Airtable-Datensatz mit Status Neu für Stellen ohne ausreichenden Anzeigentext."
     },
     {
-      "id": "js-vor-save",
-      "name": "Vorprüfung speichern",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        3400,
-        680
-      ],
-      "onError": "continueRegularOutput",
       "parameters": {
         "method": "POST",
         "url": "https://api.airtable.com/v0/YOUR_AIRTABLE_BASE_ID/YOUR_JOBS_TABLE_ID",
@@ -609,47 +709,474 @@
           "timeout": 30000
         }
       },
+      "id": "87aaeae6-c00f-420f-b884-b7142c8afa07",
+      "name": "Vorprüfung speichern",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4464,
+        2208
+      ],
       "credentials": {
         "airtableTokenApi": {
+          "id": "UsXzqEWX18Q293Vh",
           "name": "Airtable Jobsuche"
         }
-      }
+      },
+      "onError": "continueRegularOutput",
+      "notes": "Speichert den Vorprüfungs-Datensatz in Airtable."
     },
     {
-      "id": "js-summary",
+      "parameters": {},
+      "id": "e4002505-d7a0-4c24-a876-6f5a39bdab9f",
+      "name": "Pause 5 s",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4704,
+        2096
+      ],
+      "webhookId": "job-scout-wait",
+      "notes": "Wartet kurz zwischen zwei Stellen, damit das Gemini-Limit nicht überschritten wird."
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// Kurze Telegram-Meldung: nur passende Stellen mit Link, Rest als Zahlen.\nconst first = $('Neue Stellen filtern').first().json;\nconst s = first._summary || {};\nconst allRuns = name => { const res = []; for (let r = 0; r < 500; r++) { let items; try { items = $(name).all(0, r); } catch (e) { break; } if (!items || !items.length) { if (r > 0) break; else continue; } res.push(...items); } return res; };\nconst short = t => String(t || '?').replace(/\\s*\\((?:m\\/w\\/d|w\\/m\\/d|d\\/m\\/w|m\\/w\\/div|f\\/m\\/d|all genders?)\\)/gi, '').replace(/\\s+/g, ' ').trim().slice(0, 70);\nconst AT = 'https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_JOBS_TABLE_ID/';\nlet top = [], near = 0, low = 0, excl = 0, vor = 0, errs = 0;\ntry { for (const it of allRuns('Scorer aufrufen')) { const r = it.json || {}; const sc = Number(r['Score']);\n  if (r.error) { errs++; continue; }   // v1.5: Scorer-Aufruf selbst fehlgeschlagen\n  if (r['Speicherfehler']) errs++;\n  if (r['Harter Ausschluss'] && r['Harter Ausschluss'].length) { excl++; continue; }\n  if (sc >= 75) top.push({ sc, t: short(r['Stelle']), id: r['Airtable-Datensatz'] }); else if (sc >= 65) near++; else low++; } } catch (e) {}\ntry { for (const it of allRuns('Vorprüfung speichern')) { const r = it.json || {}; if (r.error) errs++; vor += (r.records || []).length; } } catch (e) {}\ntop.sort((a, b) => b.sc - a.sc);\nconst day = $now.toFormat('dd.MM.');\nif (!(s.processed > 0)) return [{ json: { text: `🔎 Job-Scout ${day}: keine neuen Stellen.` } }];\nconst lines = [`🔎 Job-Scout ${day} · ${s.processed} neu bewertet`];\nif (top.length) { lines.push('', `✅ Passend (${top.length}):`); top.forEach((x, i) => lines.push(`${i + 1}. ${x.sc} · ${x.t}` + (x.id ? `\\n   ${AT}${x.id}` : ''))); }\nelse lines.push('', 'Heute nichts ab 75.');\nconst rest = [near ? `${near} knapp darunter (65–74)` : null, low ? `${low} passen nicht` : null, excl ? `${excl} ausgeschlossen` : null, vor ? `${vor} ohne Text (Vorprüfung)` : null].filter(Boolean);\nif (rest.length) lines.push('', rest.join(' · '));\nif (s.skipped_over_cap) lines.push(`${s.skipped_over_cap} über dem Tageslimit, nicht bewertet.`);\nif (s.gmail && s.gmail.stepstone_unresolved) lines.push(`${s.gmail.stepstone_unresolved} StepStone-Links nicht auflösbar (in der Alert-Mail öffnen).`);\nif (errs) lines.push(`⚠️ ${errs} Fehler beim Bewerten oder Speichern – in n8n prüfen.`);\nreturn [{ json: { text: lines.join('\\n'), summary: s } }];\n"
+      },
+      "id": "6afca3fd-d7c1-4639-89da-3eb00ae43494",
       "name": "Zusammenfassung",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2920,
-        260
+        3984,
+        1792
       ],
-      "parameters": {
-        "jsCode": "\n// Kurze Telegram-Meldung: nur passende Stellen mit Link, Rest als Zahlen.\nconst first = $('Neue Stellen filtern').first().json;\nconst s = first._summary || {};\nconst allRuns = name => { const res = []; for (let r = 0; r < 500; r++) { let items; try { items = $(name).all(0, r); } catch (e) { break; } if (!items || !items.length) { if (r > 0) break; else continue; } res.push(...items); } return res; };\nconst short = t => String(t || '?').replace(/\\s*\\((?:m\\/w\\/d|w\\/m\\/d|d\\/m\\/w|m\\/w\\/div|f\\/m\\/d|all genders?)\\)/gi, '').replace(/\\s+/g, ' ').trim().slice(0, 70);\nconst AT = 'https://airtable.com/YOUR_AIRTABLE_BASE_ID/YOUR_JOBS_TABLE_ID/';\nlet top = [], near = 0, low = 0, excl = 0, vor = 0, errs = 0;\ntry { for (const it of allRuns('Scorer aufrufen')) { const r = it.json || {}; const sc = Number(r['Score']);\n  if (r['Speicherfehler']) errs++;\n  if (r['Harter Ausschluss'] && r['Harter Ausschluss'].length) { excl++; continue; }\n  if (sc >= 75) top.push({ sc, t: short(r['Stelle']), id: r['Airtable-Datensatz'] }); else if (sc >= 65) near++; else low++; } } catch (e) {}\ntry { for (const it of allRuns('Vorprüfung speichern')) { const r = it.json || {}; if (r.error) errs++; vor += (r.records || []).length; } } catch (e) {}\ntop.sort((a, b) => b.sc - a.sc);\nconst day = $now.toFormat('dd.MM.');\nif (!(s.processed > 0)) return [{ json: { text: `🔎 Job-Scout ${day}: keine neuen Stellen.` } }];\nconst lines = [`🔎 Job-Scout ${day} · ${s.processed} neu bewertet`];\nif (top.length) { lines.push('', `✅ Passend (${top.length}):`); top.forEach((x, i) => lines.push(`${i + 1}. ${x.sc} · ${x.t}` + (x.id ? `\\n   ${AT}${x.id}` : ''))); }\nelse lines.push('', 'Heute nichts ab 75.');\nconst rest = [near ? `${near} knapp darunter (65–74)` : null, low ? `${low} passen nicht` : null, excl ? `${excl} ausgeschlossen` : null, vor ? `${vor} ohne Text (Vorprüfung)` : null].filter(Boolean);\nif (rest.length) lines.push('', rest.join(' · '));\nif (s.skipped_over_cap) lines.push(`${s.skipped_over_cap} weitere kommen morgen.`);\nif (errs) lines.push(`⚠️ ${errs} Speicherfehler – in n8n prüfen.`);\nreturn [{ json: { text: lines.join('\\n'), summary: s } }];\n"
-      }
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput",
+      "notes": "Erstellt den Telegram-Bericht mit den passenden Stellen und den Zahlen des Laufs."
     },
     {
-      "id": "js-telegram",
-      "name": "Telegram senden",
-      "type": "n8n-nodes-base.telegram",
-      "typeVersion": 1.2,
-      "position": [
-        3160,
-        260
-      ],
       "parameters": {
         "chatId": "YOUR_TELEGRAM_CHAT_ID",
-        "text": "={{ String($json.text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }}",
+        "text": "={{ String($json.text || '⚠️ Job-Scout: Bericht konnte nicht erstellt werden. Lauf in n8n prüfen (Executions).').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') }}",
         "additionalFields": {
           "appendAttribution": false,
           "parse_mode": "HTML"
         }
       },
+      "id": "bd6359c6-a69f-4efa-a926-a98098d0d5ae",
+      "name": "Telegram senden",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4224,
+        1792
+      ],
+      "webhookId": "2dcd2160-ab60-4b61-acf2-5a251168d91b",
       "credentials": {
         "telegramApi": {
-          "name": "Telegram Jobsuche"
+          "id": "C61zX40UrrKZgRZX",
+          "name": "Automation_testBot"
         }
-      }
+      },
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notes": "Schickt den Bericht des Laufs per Telegram."
+    },
+    {
+      "parameters": {
+        "url": "={{ /click\\.stepstone\\.de\\//i.test($json.url || '') ? $json.url : 'https://invalid.invalid' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0 Safari/537.36"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "de-DE,de;q=0.9"
+            }
+          ]
+        },
+        "options": {
+          "batching": {
+            "batch": {
+              "batchSize": 1,
+              "batchInterval": 300
+            }
+          },
+          "redirect": {
+            "redirect": {
+              "followRedirects": false
+            }
+          },
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "bf9cb197-ddbc-4919-a498-2b5be961926a",
+      "name": "StepStone: Link auflösen",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2048,
+        1936
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Ruft StepStone-Maillinks ohne Weiterleitung auf, um die Stellennummer zu erhalten."
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// ---- gemeinsame Hilfsfunktionen ----\nconst P = $('Parameter').first().json;\nconst lc = s => String(s || '').toLowerCase();\nconst normKey = s => lc(s).replace(/\\(m\\/w\\/d\\)|\\(w\\/m\\/d\\)|\\(d\\/m\\/w\\)|\\(gn\\)|\\(all genders\\)|m\\/w\\/d|w\\/m\\/d/g, ' ')\n  .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/[^a-z0-9]+/g, '');\nconst canonUrl = u => {\n  let s = String(u || '').trim();\n  if (!s) return '';\n  s = s.replace(/^http:\\/\\//i, 'https://');\n  const m1 = s.match(/linkedin\\.com\\/(?:comm\\/)?jobs\\/view\\/(?:[^\\/?#]*-)?(\\d+)/i);\n  if (m1) return 'https://www.linkedin.com/jobs/view/' + m1[1];\n  const m2 = s.match(/[?&]jk=([a-z0-9]+)/i);\n  if (m2 && /indeed\\./i.test(s)) return 'https://de.indeed.com/viewjob?jk=' + m2[1];\n  const m3 = s.match(/stepstone\\.de\\/[^?#]*?--(\\d+)-inline\\.html|stepstone\\.de\\/[^?#]*?-(\\d+)(?:-inline)?\\.html/i);\n  if (m3) return 'https://www.stepstone.de/stellenangebote----' + (m3[1] || m3[2]) + '-inline.html';\n  const m4 = s.match(/xing\\.com\\/jobs\\/[^?#]+/i);\n  if (m4) return 'https://www.' + m4[0].replace(/^www\\./, '');\n  return s.split('#')[0].replace(/([?&])(utm_[^&]*|trk=[^&]*|refId=[^&]*|trackingId=[^&]*|tid=[^&]*|from=[^&]*)/g, '$1').replace(/[?&]+$/, '').replace(/\\?&/, '?');\n};\nconst titleOk = t => { const s = lc(t); return P.title_must.some(k => s.includes(k)) && !P.title_not.some(k => s.includes(k)); };\nconst htmlToText = h => String(h || '')\n  .replace(/<script[\\s\\S]*?<\\/script>/gi, ' ').replace(/<style[\\s\\S]*?<\\/style>/gi, ' ').replace(/<noscript[\\s\\S]*?<\\/noscript>/gi, ' ')\n  .replace(/<br\\s*\\/?>|<\\/(p|div|li|tr|h\\d|section|article)>/gi, '\\n').replace(/<[^>]+>/g, ' ')\n  .replace(/&nbsp;|&#160;/gi, ' ').replace(/&amp;/gi, '&').replace(/&quot;/gi, '\"').replace(/&#39;|&apos;/gi, \"'\")\n  .replace(/&auml;/gi, 'ä').replace(/&ouml;/gi, 'ö').replace(/&uuml;/gi, 'ü').replace(/&szlig;/gi, 'ß').replace(/&Auml;/g, 'Ä').replace(/&Ouml;/g, 'Ö').replace(/&Uuml;/g, 'Ü')\n  .replace(/&#(\\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&[a-z]+;/gi, ' ')\n  .replace(/[ \\t ]+/g, ' ').replace(/\\s*\\n\\s*/g, '\\n').replace(/\\n{3,}/g, '\\n\\n').trim();\n\n// v1.4: StepStone-Mail-Links (click.stepstone.de) sind Anmelde-Links und enden auf einer Cookie-Seite.\n// Der Knoten davor ruft sie OHNE Weiterleitung auf; in der Antwort (302) steht die Stellennummer.\n// Hier wird daraus die saubere Adresse gebaut. Der Mail-Link selbst wird nie weitergegeben oder gespeichert.\nconst links = $('Gmail: Links extrahieren').all();\nif (links.length === 1 && links[0].json.nothing) return [{ json: links[0].json }];\nconst known = $('Quellen vorbereiten').first().json;\nconst knownUrls = new Set(known.known_urls);\nconst res = $input.all();\nconst aligned = res.length === links.length;\nconst isClick = u => /click\\.stepstone\\.de\\//i.test(String(u || ''));\nconst meta = { ...(links[0].json._gmail || {}), stepstone_resolved: 0, stepstone_unresolved: 0 };\nconst seen = new Set(); const out = [];\nfor (let i = 0; i < links.length; i++) {\n  const l = { ...links[i].json }; delete l._gmail;\n  if (isClick(l.url)) {\n    const r = aligned ? ((res[i] && res[i].json) || {}) : {};\n    const hd = r.headers || {};\n    let hay = [hd.location, hd.Location, typeof r.data === 'string' ? r.data : '', typeof r.body === 'string' ? r.body : ''].filter(Boolean).join(' ');\n    try { hay += ' ' + decodeURIComponent(hay); } catch (e) {}\n    const m = hay.match(/-{2,}(\\d{6,})-inline\\.html/i);\n    if (!m) { meta.stepstone_unresolved++; continue; }\n    l.url = 'https://www.stepstone.de/stellenangebote----' + m[1] + '-inline.html';\n    meta.stepstone_resolved++;\n  }\n  if (seen.has(l.url) || knownUrls.has(canonUrl(l.url))) continue;\n  seen.add(l.url);\n  out.push({ json: l });\n}\nmeta.links = out.length;\nif (!out.length) return [{ json: { nothing: true, _gmail: meta } }];\nout[0].json._gmail = meta;\nreturn out;\n"
+      },
+      "id": "e3f6becf-6eac-49be-bed5-9ff6243502fa",
+      "name": "StepStone: saubere Adresse",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2288,
+        1936
+      ],
+      "retryOnFail": true,
+      "maxTries": 5,
+      "waitBetweenTries": 5000,
+      "notes": "Baut aus der Stellennummer die saubere StepStone-Adresse, der Maillink wird nie gespeichert."
+    },
+    {
+      "parameters": {
+        "url": "https://hc-ping.com/YOUR_HEALTHCHECKS_UUID/start",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "3e76e3b9-732c-4bae-82c8-b36aa9835ffd",
+      "name": "HC: Start",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        832,
+        2560
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Meldet Healthchecks.io, dass der Lauf begonnen hat."
+    },
+    {
+      "parameters": {
+        "url": "https://YOUR_N8N_HOST/healthz/readiness",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "024361c4-0121-47d5-97b7-58045fc959e8",
+      "name": "Server bereit? (1)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1072,
+        2560
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Prüft über /healthz/readiness, ob der n8n-Server bereit ist (1. Versuch)."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d1aa187c-718a-4b0f-be5a-c6caf40897ad",
+              "leftValue": "={{ $json.statusCode === 200 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "a656efca-52ea-4f0f-9866-bb11818a07f7",
+      "name": "OK (1)?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1312,
+        2560
+      ],
+      "notes": "Server bereit: weiter zu Parameter, sonst 10 Minuten warten."
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "minutes"
+      },
+      "id": "1d769cde-19ef-4e6d-ae21-9439f132cc71",
+      "name": "10 Min. warten (1)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1552,
+        2740
+      ],
+      "webhookId": "4b71666d-50b7-4d96-b5b1-ee7afc4db5d4",
+      "notes": "Wartet 10 Minuten bis zum zweiten Prüfversuch."
+    },
+    {
+      "parameters": {
+        "url": "https://YOUR_N8N_HOST/healthz/readiness",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "f235d00f-1a8f-4490-ac2b-cc128d5aecb1",
+      "name": "Server bereit? (2)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1792,
+        2740
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Prüft erneut, ob der n8n-Server bereit ist (2. Versuch)."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a6121193-fb61-41d1-9c7a-afaa0ae94dd5",
+              "leftValue": "={{ $json.statusCode === 200 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "23182c50-5824-45e2-9421-e0765a1eea95",
+      "name": "OK (2)?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2032,
+        2740
+      ],
+      "notes": "Server bereit: weiter zu Parameter, sonst noch einmal 10 Minuten warten."
+    },
+    {
+      "parameters": {
+        "amount": 10,
+        "unit": "minutes"
+      },
+      "id": "987820c0-a94e-4ca5-aa1f-d335e5ebda2c",
+      "name": "10 Min. warten (2)",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2272,
+        2920
+      ],
+      "webhookId": "a0de5e83-2876-416b-ab3b-45e7025b8583",
+      "notes": "Wartet 10 Minuten bis zum dritten Prüfversuch."
+    },
+    {
+      "parameters": {
+        "url": "https://YOUR_N8N_HOST/healthz/readiness",
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "neverError": true,
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 15000
+        }
+      },
+      "id": "6607cc6d-7882-497a-9818-df746003ad91",
+      "name": "Server bereit? (3)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2512,
+        2920
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "notes": "Prüft ein letztes Mal, ob der n8n-Server bereit ist (3. Versuch)."
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a7bb66e1-438c-43fa-ae43-c6f05e11ab15",
+              "leftValue": "={{ $json.statusCode === 200 }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "53fb49ca-0c19-4ef5-936a-9e7b57503951",
+      "name": "OK (3)?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2752,
+        2920
+      ],
+      "notes": "Server bereit: weiter zu Parameter, sonst Abbruch mit Telegram-Meldung."
+    },
+    {
+      "parameters": {
+        "chatId": "YOUR_TELEGRAM_CHAT_ID",
+        "text": "={{ '⚠️ Job-Scout ' + $now.toFormat('dd.MM. HH:mm') + ': n8n-Server dreimal nicht bereit (/healthz/readiness, je 10 Min. Abstand). Lauf abgebrochen, heute keine neuen Stellen.' }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "fd1c3152-03d9-4bad-af63-2f73b32091cc",
+      "name": "Telegram: Abbruch",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2992,
+        3100
+      ],
+      "webhookId": "ca31cc7d-863f-4105-b039-0ba5248820d4",
+      "credentials": {
+        "telegramApi": {
+          "id": "C61zX40UrrKZgRZX",
+          "name": "Automation_testBot"
+        }
+      },
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "notes": "Meldet per Telegram, dass der Lauf abgebrochen wurde, weil der Server nicht bereit war."
+    },
+    {
+      "parameters": {
+        "url": "https://hc-ping.com/YOUR_HEALTHCHECKS_UUID/fail",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "a0106e6e-f1cd-42fe-a9ff-d5fb5ed175a9",
+      "name": "HC: Fehler",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        3232,
+        3100
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Meldet Healthchecks.io, dass der Lauf fehlgeschlagen ist."
+    },
+    {
+      "parameters": {
+        "url": "https://hc-ping.com/YOUR_HEALTHCHECKS_UUID",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "text"
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "id": "bbb0eaa6-1406-4673-bfea-e1201ab61b59",
+      "name": "HC: Erfolg",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        4464,
+        1792
+      ],
+      "alwaysOutputData": true,
+      "onError": "continueRegularOutput",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "waitBetweenTries": 3000,
+      "notes": "Meldet Healthchecks.io, dass der Lauf erfolgreich beendet wurde."
     }
   ],
   "connections": {
@@ -657,18 +1184,7 @@
       "main": [
         [
           {
-            "node": "Parameter",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Zeitplan (täglich 3:17)": {
-      "main": [
-        [
-          {
-            "node": "Parameter",
+            "node": "HC: Start",
             "type": "main",
             "index": 0
           }
@@ -788,7 +1304,7 @@
       "main": [
         [
           {
-            "node": "Gmail: Anzeige laden",
+            "node": "StepStone: Link auflösen",
             "type": "main",
             "index": 0
           }
@@ -952,7 +1468,7 @@
       "main": [
         [
           {
-            "node": "Je Stelle",
+            "node": "Pause 5 s",
             "type": "main",
             "index": 0
           }
@@ -974,6 +1490,17 @@
       "main": [
         [
           {
+            "node": "Pause 5 s",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pause 5 s": {
+      "main": [
+        [
+          {
             "node": "Je Stelle",
             "type": "main",
             "index": 0
@@ -991,13 +1518,194 @@
           }
         ]
       ]
+    },
+    "StepStone: Link auflösen": {
+      "main": [
+        [
+          {
+            "node": "StepStone: saubere Adresse",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "StepStone: saubere Adresse": {
+      "main": [
+        [
+          {
+            "node": "Gmail: Anzeige laden",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Zeitplan (täglich 3:17)": {
+      "main": [
+        [
+          {
+            "node": "HC: Start",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HC: Start": {
+      "main": [
+        [
+          {
+            "node": "Server bereit? (1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Server bereit? (1)": {
+      "main": [
+        [
+          {
+            "node": "OK (1)?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OK (1)?": {
+      "main": [
+        [
+          {
+            "node": "Parameter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "10 Min. warten (1)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10 Min. warten (1)": {
+      "main": [
+        [
+          {
+            "node": "Server bereit? (2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Server bereit? (2)": {
+      "main": [
+        [
+          {
+            "node": "OK (2)?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OK (2)?": {
+      "main": [
+        [
+          {
+            "node": "Parameter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "10 Min. warten (2)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "10 Min. warten (2)": {
+      "main": [
+        [
+          {
+            "node": "Server bereit? (3)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Server bereit? (3)": {
+      "main": [
+        [
+          {
+            "node": "OK (3)?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OK (3)?": {
+      "main": [
+        [
+          {
+            "node": "Parameter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Telegram: Abbruch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram: Abbruch": {
+      "main": [
+        [
+          {
+            "node": "HC: Fehler",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram senden": {
+      "main": [
+        [
+          {
+            "node": "HC: Erfolg",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
     "executionOrder": "v1",
-    "timezone": "Europe/Berlin",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "executionTimeout": 3600,
+    "saveDataSuccessExecution": "all",
     "saveDataErrorExecution": "all",
-    "saveDataSuccessExecution": "all"
+    "saveExecutionProgress": false
   },
+  "nodeGroups": [],
   "pinData": {}
 }
